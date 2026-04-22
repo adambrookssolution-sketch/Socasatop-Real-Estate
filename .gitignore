@@ -1,0 +1,17 @@
+node_modules/
+.env
+.env.local
+.env.*.local
+*.log
+*.bak
+*.backup
+.DS_Store
+Thumbs.db
+conversations/
+uploads/
+tmp/
+tmp_*/
+*.tar.gz
+*.tsv
+.vscode/
+.idea/

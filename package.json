@@ -1,0 +1,24 @@
+{
+  "name": "socasatop",
+  "version": "1.0.0",
+  "description": "Plataforma de imoveis de alto padrao em Brasilia",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "node src/index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.100.0",
+    "axios": "^1.13.6",
+    "cors": "^2.8.6",
+    "dotenv": "^17.3.1",
+    "express": "^5.2.1",
+    "openai": "^6.33.0",
+    "pg": "^8.20.0",
+    "ws": "^8.20.0"
+  }
+}

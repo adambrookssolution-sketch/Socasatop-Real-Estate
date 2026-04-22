@@ -1,0 +1,1173 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<link rel="icon" href="data:,">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Só Casa Top — Imóveis de Alto Padrão em Brasília</title>
+<meta name="description" content="Catálogo exclusivo de imóveis de alto padrão em Brasília.">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { max-width: 100vw; overflow-x: hidden; }
+
+  :root {
+    --gold: #c9a96e;
+    --gold-light: #e8d5b0;
+    --text: #1a1a1a;
+    --text-muted: #888;
+    --bg: #fafafa;
+    --white: #ffffff;
+    --shadow: 0 4px 24px rgba(0,0,0,0.07);
+    --shadow-hover: 0 12px 40px rgba(0,0,0,0.13);
+    --radius: 12px;
+    --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    overflow-x: hidden;
+  }
+
+  /* ── NAV ── */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 18px 40px;
+    background: rgba(255,255,255,0.92);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(201,169,110,0.15);
+    transition: var(--transition);
+  }
+  nav.scrolled { padding: 12px 40px; box-shadow: 0 2px 20px rgba(0,0,0,0.06); }
+  .nav-logo img { height: 42px; object-fit: contain; }
+  .nav-logo-text {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.3rem; font-weight: 600;
+    color: var(--text); letter-spacing: 0.02em;
+  }
+  .nav-wa {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 0.85rem; font-weight: 500; color: var(--gold);
+    text-decoration: none; letter-spacing: 0.04em;
+    transition: opacity var(--transition);
+  }
+  .nav-wa:hover { opacity: 0.75; }
+
+  /* ── HERO ── */
+  #hero {
+    position: relative; height: 70vh; min-height: 480px;
+    overflow: hidden; margin-top: 0;
+  }
+  .hero-mosaic {
+    position: absolute; inset: 0;
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+    gap: 3px;
+  }
+  .hero-mosaic .tile {
+    overflow: hidden; background: #e8e0d5;
+  }
+  .hero-mosaic .tile:first-child {
+    grid-row: 1 / 3;
+  }
+  .hero-mosaic .tile img {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    transition: transform 8s ease;
+    filter: brightness(0.88);
+  }
+  .hero-mosaic .tile img:hover { transform: scale(1.04); }
+  .hero-overlay {
+    position: absolute; inset: 0;
+    background: linear-gradient(
+      135deg,
+      rgba(10,8,6,0.52) 0%,
+      rgba(10,8,6,0.28) 50%,
+      rgba(10,8,6,0.45) 100%
+    );
+  }
+  .hero-content {
+    position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    padding: 80px 40px 40px;
+  }
+  .hero-headline {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2rem, 4vw, 3.2rem);
+    font-weight: 500; color: #fff;
+    text-align: center;
+    letter-spacing: 0.01em;
+    line-height: 1.25;
+    text-shadow: 0 2px 20px rgba(0,0,0,0.3);
+  }
+  .hero-headline em {
+    font-style: italic; color: var(--gold-light);
+  }
+
+  /* ── SEARCH BAR ── */
+  #search-section {
+    position: relative; z-index: 10;
+    background: var(--white);
+    padding: 0 40px;
+    border-bottom: 1px solid #f0ece6;
+  }
+  .search-collapsed {
+    display: flex; align-items: center;
+    height: 62px; gap: 14px; cursor: text;
+  }
+  .search-icon { color: var(--gold); font-size: 1rem; flex-shrink: 0; }
+  .search-placeholder {
+    font-size: 0.95rem; color: var(--text-muted);
+    font-weight: 400; pointer-events: none;
+  }
+  .search-input-wrap {
+    flex: 1; display: flex; align-items: center;
+  }
+  #search-input {
+    flex: 1; border: none; outline: none; background: none;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.95rem; color: var(--text);
+  }
+  #search-input::placeholder { color: var(--text-muted); }
+  .search-btn {
+    padding: 9px 24px; border: none; border-radius: 8px;
+    background: var(--gold); color: var(--white);
+    font-family: 'Inter', sans-serif; font-size: 0.85rem;
+    font-weight: 500; cursor: pointer; letter-spacing: 0.04em;
+    transition: background var(--transition), transform var(--transition);
+    flex-shrink: 0;
+  }
+  .search-btn:hover { background: #b8925a; transform: translateY(-1px); }
+  .filters-expanded {
+    max-height: 0; overflow: hidden;
+    transition: max-height 0.45s cubic-bezier(0.4, 0, 0.2, 1),
+                padding 0.3s ease, opacity 0.3s ease;
+    opacity: 0; padding-bottom: 0;
+  }
+  .filters-expanded.open {
+    max-height: 120px; opacity: 1; padding-bottom: 20px;
+  }
+  .filters-row {
+    display: flex; gap: 12px; flex-wrap: wrap; padding-top: 4px;
+  }
+  .filter-select {
+    padding: 8px 14px; border: 1px solid #e8e2da;
+    border-radius: 8px; background: var(--white);
+    font-family: 'Inter', sans-serif; font-size: 0.85rem;
+    color: var(--text); cursor: pointer; min-width: 140px;
+    transition: border-color var(--transition);
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23c9a96e'/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: right 10px center;
+    padding-right: 28px;
+  }
+  .filter-select:focus { outline: none; border-color: var(--gold); }
+  .filter-clear {
+    padding: 8px 14px; border: 1px solid #e8e2da; border-radius: 8px;
+    background: none; font-family: 'Inter', sans-serif; font-size: 0.85rem;
+    color: var(--text-muted); cursor: pointer;
+    transition: all var(--transition);
+  }
+  .filter-clear:hover { border-color: var(--gold); color: var(--gold); }
+
+  /* ── CATEGORIES ── */
+  #categories {
+    display: flex; align-items: center; gap: 10px;
+    padding: 28px 40px 0; flex-wrap: wrap;
+  }
+  .cat-pill {
+    padding: 7px 18px; border-radius: 100px;
+    border: 1px solid #e8e2da; background: var(--white);
+    font-size: 0.82rem; font-weight: 500; color: var(--text-muted);
+    cursor: pointer; transition: all var(--transition);
+    letter-spacing: 0.03em;
+  }
+  .cat-pill:hover { border-color: var(--gold); color: var(--gold); }
+  .cat-pill.active {
+    background: var(--gold); color: var(--white);
+    border-color: var(--gold);
+  }
+  .cat-pill .count {
+    font-size: 0.75rem; opacity: 0.75; margin-left: 4px;
+  }
+  .section-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 20px 40px 0;
+  }
+  .results-count { font-size: 0.85rem; color: var(--text-muted); }
+  .sort-select {
+    padding: 7px 12px; border: 1px solid #e8e2da; border-radius: 8px;
+    background: var(--white); font-family: 'Inter', sans-serif;
+    font-size: 0.82rem; color: var(--text); cursor: pointer;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23c9a96e'/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: right 10px center;
+    padding-right: 28px;
+  }
+  .sort-select:focus { outline: none; border-color: var(--gold); }
+
+  /* ── PROPERTY GRID ── */
+  #grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 28px; padding: 24px 40px 60px;
+  }
+  .card {
+    background: var(--white); border-radius: var(--radius);
+    box-shadow: var(--shadow); overflow: hidden;
+    cursor: pointer; transition: box-shadow var(--transition), transform var(--transition);
+    animation: fadeUp 0.5s ease both;
+  }
+  .card:hover {
+    box-shadow: var(--shadow-hover);
+    transform: translateY(-4px);
+  }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .card-img-wrap {
+    position: relative; aspect-ratio: 4/3; overflow: hidden;
+    background: #f0ece6;
+  }
+  .card-img-wrap img {
+    width: 100%; height: 100%; object-fit: cover;
+    transition: transform 0.6s ease;
+  }
+  .card:hover .card-img-wrap img { transform: scale(1.04); }
+  .card-badge {
+    position: absolute; top: 12px; left: 12px;
+    padding: 4px 10px; border-radius: 6px; font-size: 0.72rem;
+    font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase;
+  }
+  .badge-venda { background: rgba(255,255,255,0.92); color: #8b5e2a; }
+  .badge-aluguel { background: rgba(255,255,255,0.92); color: #2a5e8b; }
+  .card-photo-count {
+    position: absolute; bottom: 10px; right: 10px;
+    background: rgba(0,0,0,0.55); color: #fff;
+    padding: 3px 9px; border-radius: 20px; font-size: 0.72rem;
+    display: flex; align-items: center; gap: 5px;
+    backdrop-filter: blur(4px);
+  }
+  .card-body { padding: 18px 20px 20px; }
+  .card-price {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.25rem; font-weight: 600; color: var(--text);
+    margin-bottom: 6px;
+  }
+  .card-price.consulta { font-size: 1rem; color: var(--text-muted); font-family: 'Inter', sans-serif; font-style: italic; }
+  .card-title {
+    font-size: 0.92rem; font-weight: 500; color: var(--text);
+    margin-bottom: 8px; line-height: 1.4;
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+  }
+  .card-meta {
+    display: flex; flex-wrap: wrap; gap: 12px;
+    font-size: 0.78rem; color: var(--text-muted);
+  }
+  .card-meta span { display: flex; align-items: center; gap: 4px; }
+
+  .card-share {
+    display: flex; justify-content: center; gap: 6px;
+    padding: 8px 16px 14px; border-top: 1px solid #f3f0eb;
+  }
+  .card-share a, .card-share button {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 36px; height: 36px; border-radius: 50%; border: 1px solid #eae6e0;
+    background: #fff; color: #9b8e7e; font-size: 15px;
+    cursor: pointer; text-decoration: none; transition: all 0.25s ease;
+    padding: 0; line-height: 1;
+  }
+  .card-share a:hover, .card-share button:hover {
+    color: #fff; transform: translateY(-2px);
+    box-shadow: 0 4px 14px rgba(0,0,0,0.12);
+  }
+  .card-share a.share-wa:hover { background: #25d366; border-color: #25d366; }
+  .card-share a:not(.share-wa):hover { background: #4a7eff; border-color: #4a7eff; }
+  .card-share button:hover { background: var(--gold); border-color: var(--gold); }
+
+  /* ── LOADING / EMPTY ── */
+  #loading {
+    display: flex; flex-direction: column; align-items: center;
+    justify-content: center; padding: 80px 40px; gap: 18px;
+    color: var(--text-muted); font-size: 0.9rem;
+  }
+  .spinner {
+    width: 32px; height: 32px; border-radius: 50%;
+    border: 2px solid var(--gold-light);
+    border-top-color: var(--gold);
+    animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  #empty { display: none; text-align: center; padding: 60px 40px; color: var(--text-muted); }
+
+  /* ── MODAL ── */
+  #modal-overlay {
+    position: fixed; inset: 0; z-index: 1000;
+    background: rgba(8,6,4,0.78);
+    display: none; align-items: center; justify-content: center;
+    padding: 20px;
+    backdrop-filter: blur(6px);
+    animation: fadeIn 0.2s ease;
+  }
+  #modal-overlay.open { display: flex; }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+  .modal {
+    background: var(--white); border-radius: 16px;
+    width: 100%; max-width: 900px; max-height: 90vh;
+    overflow-y: auto; position: relative;
+    animation: slideUp 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  @keyframes slideUp { from { transform: translateY(30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+  .modal-close {
+    position: sticky; top: 0; z-index: 10; display: flex; justify-content: flex-end;
+    padding: 16px 20px 0; background: var(--white);
+  }
+  .modal-close button {
+    width: 36px; height: 36px; border-radius: 50%; border: 1px solid #e8e2da;
+    background: var(--white); cursor: pointer; font-size: 1.1rem; color: var(--text-muted);
+    transition: all var(--transition); display: flex; align-items: center; justify-content: center;
+  }
+  .modal-close button:hover { background: #f5f0e8; color: var(--text); border-color: var(--gold); }
+  .modal-gallery { position: relative; aspect-ratio: 16/9; background: #0a0806; overflow: hidden; }
+  .modal-gallery img, .modal-gallery video {
+    width: 100%; height: 100%; object-fit: cover;
+    display: none;
+  }
+  .modal-gallery img.active, .modal-gallery video.active { display: block; }
+  .gallery-nav {
+    position: absolute; top: 50%; transform: translateY(-50%);
+    display: flex; justify-content: space-between; width: 100%; padding: 0 14px;
+    pointer-events: none;
+  }
+  .gallery-nav button {
+    pointer-events: all;
+    width: 40px; height: 40px; border-radius: 50%; border: none;
+    background: rgba(255,255,255,0.9); color: var(--text); font-size: 1rem;
+    cursor: pointer; transition: all var(--transition);
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+  }
+  .gallery-nav button:hover { background: var(--white); transform: scale(1.08); }
+  .gallery-counter {
+    position: absolute; bottom: 14px; right: 14px;
+    background: rgba(0,0,0,0.55); color: #fff;
+    padding: 4px 10px; border-radius: 20px; font-size: 0.75rem;
+    backdrop-filter: blur(4px);
+  }
+  .thumbs {
+    display: flex; gap: 6px; padding: 10px 20px;
+    overflow-x: auto; background: #f8f5f0;
+  }
+  .thumbs::-webkit-scrollbar { height: 4px; }
+  .thumbs::-webkit-scrollbar-track { background: #f0ece6; }
+  .thumbs::-webkit-scrollbar-thumb { background: var(--gold-light); border-radius: 2px; }
+  .thumb {
+    width: 64px; height: 48px; flex-shrink: 0; border-radius: 6px;
+    overflow: hidden; cursor: pointer; opacity: 0.55;
+    border: 2px solid transparent; transition: all var(--transition);
+  }
+  .thumb.active { opacity: 1; border-color: var(--gold); }
+  .thumb img { width: 100%; height: 100%; object-fit: cover; }
+  .modal-body { padding: 28px 32px 32px; }
+  .modal-badge-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+  .modal-badge {
+    padding: 4px 12px; border-radius: 6px; font-size: 0.72rem;
+    font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase;
+  }
+  .modal-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.65rem; font-weight: 600; color: var(--text);
+    line-height: 1.3; margin-bottom: 6px;
+  }
+  .modal-location { font-size: 0.88rem; color: var(--text-muted); margin-bottom: 20px; }
+  .modal-price {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.9rem; font-weight: 700; color: var(--text); margin-bottom: 20px;
+  }
+  .modal-price.consulta { font-size: 1.1rem; color: var(--text-muted); font-family: 'Inter', sans-serif; font-style: italic; }
+  .modal-details {
+    display: flex; flex-wrap: wrap; gap: 20px;
+    padding: 18px 0; border-top: 1px solid #f0ece6; border-bottom: 1px solid #f0ece6;
+    margin-bottom: 22px;
+  }
+  .detail-item { display: flex; flex-direction: column; gap: 2px; }
+  .detail-label { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); }
+  .detail-value { font-size: 0.95rem; font-weight: 500; color: var(--text); }
+  .modal-desc {
+    font-size: 0.9rem; color: #555; line-height: 1.75;
+    margin-bottom: 28px;
+  }
+  .modal-video { margin-bottom: 24px; }
+  .modal-video h3 {
+    font-family: 'Playfair Display', serif; font-size: 1rem;
+    font-weight: 500; margin-bottom: 10px; color: var(--text);
+  }
+  .modal-video video { width: 100%; border-radius: 10px; }
+  .modal-actions { display: flex; gap: 12px; flex-wrap: wrap; }
+  .btn-wa {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 14px 28px; border-radius: 10px;
+    background: #25d366; color: var(--white);
+    font-family: 'Inter', sans-serif; font-weight: 600; font-size: 0.95rem;
+    text-decoration: none; transition: all var(--transition);
+    letter-spacing: 0.02em;
+  }
+  .btn-wa:hover { background: #1ebe5d; transform: translateY(-2px); box-shadow: 0 6px 20px rgba(37,211,102,0.3); }
+  .modal-actions { display: flex; flex-direction: column; gap: 10px; }
+  .btn-share {
+    display: inline-flex; align-items: center; gap: 8px; justify-content: center;
+    padding: 12px 28px; border-radius: 10px;
+    background: var(--neutral-100); color: var(--text); border: 1px solid var(--neutral-200);
+    font-family: 'Inter', sans-serif; font-weight: 600; font-size: 0.9rem;
+    text-decoration: none; transition: all var(--transition);
+  }
+  .btn-share:hover { background: var(--neutral-200); }
+  .btn-copy {
+    display: inline-flex; align-items: center; gap: 8px; justify-content: center;
+    padding: 12px 28px; border-radius: 10px; cursor: pointer;
+    background: transparent; color: var(--gold); border: 1px solid var(--gold);
+    font-family: 'Inter', sans-serif; font-weight: 600; font-size: 0.9rem;
+    transition: all var(--transition);
+  }
+  .btn-copy:hover { background: var(--gold); color: var(--white); }
+  .share-row { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+  .btn-share-icon {
+    display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+    padding: 10px 18px; border-radius: 10px; cursor: pointer;
+    font-family: 'Inter', sans-serif; font-weight: 600; font-size: 0.85rem;
+    text-decoration: none; transition: all 0.2s; border: 1px solid var(--neutral-200);
+    background: var(--neutral-100); color: var(--text);
+  }
+  .btn-share-icon:hover { background: var(--neutral-200); transform: translateY(-1px); }
+  .btn-share-icon.whatsapp-share { background: #e8f8ee; color: #25d366; border-color: #25d366; }
+  .btn-share-icon.whatsapp-share:hover { background: #25d366; color: #fff; }
+  .btn-share-icon.email-share { background: #eef3ff; color: #4a7eff; border-color: #4a7eff; }
+  .btn-share-icon.email-share:hover { background: #4a7eff; color: #fff; }
+  .btn-share-icon.native-share { background: #fff5e6; color: #e8a020; border-color: #e8a020; }
+  .btn-share-icon.native-share:hover { background: #e8a020; color: #fff; }
+
+
+  /* -- LIGHTBOX -- */
+  #lightbox-overlay {
+    display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.92); z-index: 10000;
+    align-items: center; justify-content: center; cursor: zoom-out;
+  }
+  #lightbox-overlay.open { display: flex; }
+  #lightbox-overlay img {
+    max-width: 92vw; max-height: 92vh; object-fit: contain;
+    border-radius: 8px; box-shadow: 0 8px 40px rgba(0,0,0,0.5);
+    animation: lbFadeIn 0.2s ease;
+  }
+  @keyframes lbFadeIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+  #lightbox-close {
+    position: fixed; top: 20px; right: 24px; z-index: 10001;
+    width: 40px; height: 40px; border-radius: 50%;
+    background: rgba(255,255,255,0.15); border: none; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: background 0.2s;
+  }
+  #lightbox-close:hover { background: rgba(255,255,255,0.3); }
+  #lightbox-close svg { color: #fff; }
+  #lightbox-nav {
+    position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
+    display: flex; gap: 12px; z-index: 10001;
+  }
+  #lightbox-nav button {
+    width: 44px; height: 44px; border-radius: 50%;
+    background: rgba(255,255,255,0.15); border: none; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: background 0.2s; color: #fff;
+  }
+  #lightbox-nav button:hover { background: rgba(255,255,255,0.3); }
+  #lightbox-counter {
+    position: fixed; bottom: 85px; left: 50%; transform: translateX(-50%);
+    color: rgba(255,255,255,0.7); font-size: 0.85rem; z-index: 10001;
+  }
+
+    /* ── FOOTER ── */
+  footer {
+    background: var(--white); border-top: 1px solid #f0ece6;
+    padding: 32px 40px; text-align: center;
+    color: var(--text-muted); font-size: 0.82rem; letter-spacing: 0.03em;
+  }
+  footer a { color: var(--gold); text-decoration: none; }
+  footer a:hover { text-decoration: underline; }
+
+  /* ── FLOATING WA ── */
+  #float-wa {
+    position: fixed; bottom: 28px; right: 28px; z-index: 90;
+    width: 56px; height: 56px; border-radius: 50%;
+    background: #25d366; color: var(--white); font-size: 1.4rem;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 4px 20px rgba(37,211,102,0.45); text-decoration: none;
+    transition: all var(--transition);
+    animation: pulse 3s ease infinite;
+  }
+  #float-wa:hover { transform: scale(1.1); box-shadow: 0 8px 30px rgba(37,211,102,0.5); }
+  @keyframes pulse {
+    0%, 100% { box-shadow: 0 4px 20px rgba(37,211,102,0.45); }
+    50% { box-shadow: 0 4px 30px rgba(37,211,102,0.7); }
+  }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 768px) {
+    nav { padding: 10px 12px; }
+    nav.scrolled { padding: 8px 12px; }
+    .hero-mosaic {
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: repeat(3, 1fr);
+    }
+    .hero-mosaic .tile:first-child { grid-row: 1 / 2; grid-column: 1 / 3; }
+    .hero-headline { font-size: clamp(1.2rem, 4.5vw, 2rem); }
+    #search-section { padding: 0 12px; }
+    #categories { padding: 12px 12px 0; }
+    .section-header { padding: 10px 12px 0; }
+    #grid { grid-template-columns: 1fr !important; gap: 16px; padding: 12px !important; }
+    .card { max-width: 100%; }
+    .card-img-wrap { aspect-ratio: 4/3; }
+    .card-body { padding: 14px 16px; }
+    .card-share { padding: 6px 12px 10px; }
+    .modal { width: 96vw; max-height: 95vh; }
+    .modal-body { padding: 16px; }
+    .modal-title { font-size: 1.1rem; }
+    footer { padding: 20px 12px; }
+  }
+  @media (max-width: 480px) {
+    .hero-mosaic {
+      grid-template-columns: 1fr;
+      grid-template-rows: 1fr;
+    }
+    .hero-mosaic .tile:not(:first-child) { display: none; }
+    #grid { padding: 8px !important; gap: 12px; }
+    nav { padding: 8px 10px; }
+    .modal { width: 100vw; max-height: 100vh; margin: 0; border-radius: 0; }
+  }
+
+  /* ── MOBILE RESPONSIVE (enhanced) ── */
+  @media (max-width: 768px) {
+    #grid { grid-template-columns: 1fr; padding: 12px; gap: 16px; }
+    .card { max-width: 100%; }
+    .card-body { padding: 14px 16px 16px; }
+    .card-share { padding: 6px 12px 10px; }
+    .modal { width: 96vw; max-height: 95vh; margin: 10px auto; border-radius: 12px; }
+    .modal-body { padding: 16px 18px 20px; }
+    .modal-gallery { aspect-ratio: 4/3; }
+    .modal-title { font-size: 1.1rem; }
+    .btn-wa { padding: 12px 20px; font-size: 0.9rem; }
+    #search-section { padding: 0 12px; }
+    #categories { padding: 12px 12px 0; }
+    .section-header { padding: 10px 12px 0; }
+    footer { padding: 20px 16px; }
+  }
+  @media (max-width: 480px) {
+    #grid { grid-template-columns: 1fr; padding: 8px; gap: 12px; }
+    .modal { width: 100vw; max-height: 100vh; margin: 0; border-radius: 0; }
+    nav { padding: 10px 12px; }
+    .hero-headline { font-size: clamp(1.2rem, 5vw, 1.8rem); }
+  }
+
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav id="navbar">
+  <div class="nav-logo">
+    <img src="/wp-content/uploads/2025/02/logo-socasatop.png" alt="Só Casa Top"
+      onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
+    <span class="nav-logo-text" style="display:none">Só Casa Top</span>
+  </div>
+  <a class="nav-wa" href="https://wa.me/556184136152" target="_blank" rel="noopener">
+     Falar com corretor
+  </a>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="hero-mosaic" id="heroMosaic">
+    <!-- tiles injected by JS -->
+    <div class="tile" style="background:#e8e0d5"></div>
+    <div class="tile" style="background:#ede6da"></div>
+    <div class="tile" style="background:#e4dbd0"></div>
+    <div class="tile" style="background:#ede8e0"></div>
+    <div class="tile" style="background:#e8e2d5"></div>
+  </div>
+  <div class="hero-overlay"></div>
+  <div class="hero-content">
+    <h1 class="hero-headline">Bem-vindo ao <em>alto padrão</em> de Brasília.</h1>
+  </div>
+</section>
+
+<!-- SEARCH -->
+<section id="search-section">
+  <div class="search-collapsed" id="searchCollapsed">
+    <span class="search-icon">&#128269;</span>
+    <div class="search-input-wrap">
+      <input type="text" id="search-input" placeholder="Comprar ou alugar? Busque por localização...">
+    </div>
+    <button class="search-btn" onclick="applyFilters()">Buscar</button>
+  </div>
+  <div class="filters-expanded" id="filtersExpanded">
+    <div class="filters-row">
+      <select class="filter-select" id="fOffer">
+        <option value="">Comprar ou Alugar</option>
+        <option value="venda">Comprar</option>
+        <option value="aluguel">Alugar</option>
+      </select>
+      <select class="filter-select" id="fType">
+        <option value="">Tipo de imóvel</option>
+        <option value="casa">Casa</option>
+        <option value="apartamento">Apartamento</option>
+        <option value="terreno">Terreno</option>
+        <option value="cobertura">Cobertura</option>
+        <option value="comercial">Comercial</option>
+      </select>
+      <select class="filter-select" id="fLocation">
+        <option value="">Localização</option>
+      </select>
+      <select class="filter-select" id="fBeds">
+        <option value="">Quartos</option>
+        <option value="1">1+</option>
+        <option value="2">2+</option>
+        <option value="3">3+</option>
+        <option value="4">4+</option>
+        <option value="5">5+</option>
+      </select>
+      <button class="filter-clear" onclick="clearFilters()">Limpar filtros</button>
+    </div>
+  </div>
+</section>
+
+<!-- CATEGORIES -->
+<div id="categories"></div>
+
+<!-- SECTION HEADER -->
+<div class="section-header">
+  <span class="results-count" id="resultsCount"></span>
+  <select class="sort-select" id="sortSelect" onchange="applyFilters()">
+    <option value="price_desc">Maior preço</option>
+    <option value="price_asc">Menor preço</option>
+    <option value="newest">Mais recentes</option>
+  </select>
+</div>
+
+<!-- GRID -->
+<div id="loading">
+  <div class="spinner"></div>
+  <span>Carregando imóveis...</span>
+</div>
+<div id="grid" style="display:none"></div>
+<div id="empty">
+  <p style="font-size:1rem; margin-bottom:8px;">Nenhum imóvel encontrado.</p>
+  <p style="font-size:0.85rem;">Tente ajustar os filtros ou <a href="#" onclick="clearFilters(); return false;" style="color:var(--gold)">limpar a busca</a>.</p>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <p>Só Casa Top &middot; Imóveis de alto padrão em Brasília &nbsp;&bull;&nbsp;
+    <a href="https://wa.me/556184136152" target="_blank" rel="noopener"> WhatsApp</a>
+  </p>
+</footer>
+
+<!-- FLOATING WA -->
+<a id="float-wa" href="https://wa.me/556184136152" target="_blank" rel="noopener" title="Falar com corretor"></a>
+
+<!-- MODAL -->
+<div id="modal-overlay" role="dialog" aria-modal="true">
+  <div class="modal" id="modalBox">
+    <div class="modal-close">
+      <button onclick="closeModal()" aria-label="Fechar">&times;</button>
+    </div>
+    <div class="modal-gallery" id="modalGallery">
+      <!-- media injected -->
+      <div class="gallery-nav">
+        <button onclick="galleryNav(-1)" aria-label="Anterior">&#8592;</button>
+        <button onclick="galleryNav(1)" aria-label="Próximo">&#8594;</button>
+      </div>
+      <div class="gallery-counter" id="galleryCounter"></div>
+    </div>
+    <div class="thumbs" id="modalThumbs"></div>
+    <div class="modal-body" id="modalBody"></div>
+  </div>
+</div>
+
+<script>
+const WA = 'https://wa.me/556184136152';
+const PHOTO_RE = /\.(jpg|jpeg|png|webp)(\?|$)/i;
+const VIDEO_RE = /\.(mp4|mov|webm)(\?|$)/i;
+const MEDIA_RE = /\.(jpg|jpeg|png|webp|mp4|mov|webm)(\?|$)/i;
+
+let allProperties = [];
+let filtered = [];
+let activeCat = '';
+let galleryItems = [];
+let galleryIdx = 0;
+
+// ── FETCH ──
+async function loadProperties() {
+  try {
+    const res = await fetch('/api/imoveis?limit=1000');
+    const json = await res.json();
+    allProperties = json.data || [];
+    initUI();
+  } catch(e) {
+    document.getElementById('loading').innerHTML =
+      '<p style="color:var(--text-muted)">Erro ao carregar imóveis. Verifique a conexão.</p>';
+  }
+}
+
+function initUI() {
+  buildHeroMosaic();
+  buildLocationFilter();
+  buildCategories();
+  applyFilters();
+  document.getElementById('loading').style.display = 'none';
+  document.getElementById('grid').style.display = 'grid';
+}
+
+// ── HERO MOSAIC ──
+function buildHeroMosaic() {
+  const withImages = allProperties
+    .filter(p => {
+      const photos = getPhotos(p);
+      if (photos.length < 2) return false;
+      const first = photos[0].toLowerCase();
+      if (/\/\d\.(jpg|jpeg|png|webp)$/i.test(first)) return false;
+      if (first.includes('captura-de-tela')) return false;
+      if (first.includes('poster.jpg')) return false;
+      return true;
+    })
+    .sort((a,b) => parsePrice(b) - parsePrice(a))
+    .slice(0, 8);
+
+  const mosaic = document.getElementById('heroMosaic');
+  if (!withImages.length) return;
+  mosaic.innerHTML = '';
+  const heroMainImg = '/wp-content/uploads/2026/01/WhatsApp-Image-2026-01-14-at-08.48.38-1.jpeg';
+  const mainName = heroMainImg.split('/').pop();
+  const others = [];
+  for (const p of withImages) {
+    const ph = getPhotos(p);
+    for (const u of ph) {
+      if (!u.includes(mainName) && !others.includes(u)) { others.push(u); break; }
+    }
+    if (others.length >= 7) break;
+  }
+  const heroImages = [heroMainImg, ...others].slice(0, 8);
+  heroImages.forEach((src, i) => {
+    const tile = document.createElement('div');
+    tile.className = 'tile';
+    if (i === 0) tile.style.gridRow = '1 / 3';
+    const img = document.createElement('img');
+    img.src = src;
+    img.alt = '';
+    img.loading = i < 3 ? 'eager' : 'lazy';
+    img.decoding = 'async';
+    tile.appendChild(img);
+    mosaic.appendChild(tile);
+  });
+}
+
+// ── LOCATION FILTER ──
+function buildLocationFilter() {
+  const locs = [...new Set(allProperties.map(p => p.location || p.neighborhood).filter(Boolean))].sort();
+  const sel = document.getElementById('fLocation');
+  locs.forEach(l => {
+    const opt = document.createElement('option');
+    opt.value = l.toLowerCase(); opt.textContent = l;
+    sel.appendChild(opt);
+  });
+}
+
+// ── CATEGORIES ──
+function buildCategories() {
+  const cats = [
+    { key: '', label: 'Todos' },
+    { key: 'casa', label: 'Casa' },
+    { key: 'apartamento', label: 'Apartamento' },
+    { key: 'terreno', label: 'Terreno' },
+    { key: 'aluguel', label: 'Aluguel' },
+  ];
+  const container = document.getElementById('categories');
+  container.innerHTML = '';
+  cats.forEach(c => {
+    let count;
+    if (c.key === '') count = allProperties.length;
+    else if (c.key === 'aluguel') count = allProperties.filter(p => (p.offer_type||'').toLowerCase() === 'aluguel').length;
+    else count = allProperties.filter(p => (p.property_type||'').toLowerCase().includes(c.key)).length;
+
+    const pill = document.createElement('button');
+    pill.className = 'cat-pill' + (activeCat === c.key ? ' active' : '');
+    pill.innerHTML = `${c.label} <span class="count">${count}</span>`;
+    pill.onclick = () => { activeCat = c.key; buildCategories(); applyFilters(); };
+    container.appendChild(pill);
+  });
+}
+
+// ── FILTERS ──
+function applyFilters() {
+  const query = (document.getElementById('search-input').value || '').toLowerCase().trim();
+  const offer = document.getElementById('fOffer').value.toLowerCase();
+  const type = document.getElementById('fType').value.toLowerCase();
+  const loc = document.getElementById('fLocation').value.toLowerCase();
+  const beds = parseInt(document.getElementById('fBeds').value) || 0;
+  const sort = document.getElementById('sortSelect').value;
+
+  filtered = allProperties.filter(p => {
+    const pType = (p.property_type || '').toLowerCase();
+    const pOffer = (p.offer_type || '').toLowerCase();
+    const pLoc = ((p.location || '') + ' ' + (p.neighborhood || '') + ' ' + (p.street || '')).toLowerCase();
+    const pTitle = (p.titulo || '').toLowerCase();
+
+    if (activeCat === 'aluguel' && pOffer !== 'aluguel') return false;
+    else if (activeCat && activeCat !== 'aluguel' && !pType.includes(activeCat)) return false;
+
+    if (offer && pOffer !== offer) return false;
+    if (type && !pType.includes(type)) return false;
+    if (loc && !pLoc.includes(loc)) return false;
+    if (beds && (p.bedrooms || 0) < beds) return false;
+    if (query && !pTitle.includes(query) && !pLoc.includes(query)) return false;
+    return true;
+  });
+
+  if (sort === 'price_asc') filtered.sort((a,b) => parsePrice(a) - parsePrice(b));
+  else if (sort === 'price_desc') filtered.sort((a,b) => parsePrice(b) - parsePrice(a));
+
+  renderGrid();
+}
+
+function clearFilters() {
+  document.getElementById('search-input').value = '';
+  document.getElementById('fOffer').value = '';
+  document.getElementById('fType').value = '';
+  document.getElementById('fLocation').value = '';
+  document.getElementById('fBeds').value = '';
+  activeCat = '';
+  buildCategories();
+  applyFilters();
+}
+
+// ── GRID ──
+function renderGrid() {
+  const grid = document.getElementById('grid');
+  const empty = document.getElementById('empty');
+  const count = document.getElementById('resultsCount');
+
+  count.textContent = filtered.length + ' imóvel' + (filtered.length !== 1 ? 's' : '') + ' encontrado' + (filtered.length !== 1 ? 's' : '');
+
+  if (!filtered.length) {
+    grid.style.display = 'none'; empty.style.display = 'block'; return;
+  }
+  grid.style.display = 'grid'; empty.style.display = 'none';
+
+  grid.innerHTML = '';
+  filtered.forEach((p, i) => {
+    const card = buildCard(p, i);
+    grid.appendChild(card);
+  });
+}
+
+function buildCard(p, i) {
+  const photos = getPhotos(p);
+  const price = formatPrice(p);
+  const offer = (p.offer_type || '').toLowerCase();
+  const badgeClass = offer === 'aluguel' ? 'badge-aluguel' : 'badge-venda';
+  const badgeLabel = offer === 'aluguel' ? 'Aluguel' : 'Venda';
+  const locationText = p.neighborhood || p.location || '—';
+  const hasPrice = !!p.amount;
+
+  const card = document.createElement('div');
+  card.className = 'card';
+  card.style.animationDelay = Math.min(i * 0.04, 0.4) + 's';
+  card.onclick = () => openModal(p);
+
+  card.innerHTML = `
+    <div class="card-img-wrap">
+      ${photos.length
+        ? `<img src="${photos[0]}" alt="${p.titulo || ''}" loading="lazy">`
+        : `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:#ccc;font-size:2rem"></div>`}
+      <span class="card-badge ${badgeClass}">${badgeLabel}</span>
+      ${photos.length > 1 ? `<span class="card-photo-count"> ${photos.length}</span>` : ''}
+    </div>
+    <div class="card-body">
+      <div class="card-price ${hasPrice ? '' : 'consulta'}">${price}</div>
+      <div class="card-title">${p.titulo || 'Imóvel'}</div>
+      <div class="card-meta">
+        <span> ${locationText}</span>
+        ${p.bedrooms ? `<span> ${p.bedrooms} qto${p.bedrooms > 1 ? 's' : ''}</span>` : ''}
+        ${p.size ? `<span> ${p.size} m²</span>` : ''}
+      </div>
+    </div>
+    <div class="card-share" onclick="event.stopPropagation()">
+      <a href="https://wa.me/?text=${encodeURIComponent(p.titulo + ' - ' + price + ' %0Ahttps://socasatop.com.br/imovel/' + p.id)}" target="_blank" rel="noopener" title="WhatsApp" class="share-wa"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg></a>
+      <a href="mailto:?subject=${encodeURIComponent(p.titulo)}&body=${encodeURIComponent(p.titulo + ' - ' + price + '%0A%0Ahttps://socasatop.com.br/imovel/' + p.id)}" target="_blank" title="E-mail"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg></a>
+      <button class="copy-link-btn" data-url="https://socasatop.com.br/imovel/${p.id}" title="Copiar link"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg></button>
+      <button class="native-share-btn" data-title="${p.titulo.replace(/'/g,'')}" data-url="https://socasatop.com.br/imovel/${p.id}" title="Compartilhar"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
+    </div>`;
+  return card;
+}
+
+// ── MODAL ──
+function openModal(p) {
+  const overlay = document.getElementById('modal-overlay');
+  const gallery = document.getElementById('modalGallery');
+  const thumbs = document.getElementById('modalThumbs');
+  const body = document.getElementById('modalBody');
+  const counter = document.getElementById('galleryCounter');
+
+  const photos = getPhotos(p);
+  const videos = getVideos(p);
+  galleryItems = photos;
+  galleryIdx = 0;
+
+  // Gallery
+  const navDiv = gallery.querySelector('.gallery-nav');
+  const counterDiv = gallery.querySelector('.gallery-counter');
+  gallery.innerHTML = '';
+  gallery.appendChild(navDiv);
+  gallery.appendChild(counterDiv);
+
+  photos.forEach((src, i) => {
+    const img = document.createElement('img');
+    img.src = src; img.alt = ''; img.loading = i === 0 ? 'eager' : 'lazy';
+    img.style.cursor = 'zoom-in';
+    img.onclick = function(e) { e.stopPropagation(); openLightbox(photos, i); };
+    if (i === 0) img.classList.add('active');
+    gallery.insertBefore(img, navDiv);
+  });
+
+  // Thumbnails
+  thumbs.innerHTML = '';
+  photos.forEach((src, i) => {
+    const t = document.createElement('div');
+    t.className = 'thumb' + (i === 0 ? ' active' : '');
+    t.innerHTML = `<img src="${src}" alt="" loading="lazy">`;
+    t.onclick = () => setGalleryIdx(i);
+    thumbs.appendChild(t);
+  });
+
+  updateGalleryCounter();
+  if (photos.length <= 1) navDiv.style.display = 'none';
+  else navDiv.style.display = '';
+
+  // Body
+  const offer = (p.offer_type || '').toLowerCase();
+  const badgeClass = offer === 'aluguel' ? 'badge-aluguel' : 'badge-venda';
+  const badgeLabel = offer === 'aluguel' ? 'Aluguel' : 'Venda';
+  const price = formatPrice(p);
+  const hasPrice = !!p.amount;
+  const locationText = [p.neighborhood, p.location].filter(Boolean).join(', ') || p.street || '';
+  const waText = encodeURIComponent(`Olá! Tenho interesse: ${p.titulo || 'Imóvel'}\n\nhttps://socasatop.com.br/imovel/${p.id}`);
+  const waLink = `${WA}?text=${waText}`;
+
+  let detailsHtml = '';
+  if (p.bedrooms) detailsHtml += `<div class="detail-item"><div class="detail-label">Quartos</div><div class="detail-value">${p.bedrooms}</div></div>`;
+  if (p.size) detailsHtml += `<div class="detail-item"><div class="detail-label">Área</div><div class="detail-value">${p.size} m²</div></div>`;
+  if (p.condominium) detailsHtml += `<div class="detail-item"><div class="detail-label">Condomínio</div><div class="detail-value">${formatCurrency(p.condominium)}</div></div>`;
+  if (p.financing) detailsHtml += `<div class="detail-item"><div class="detail-label">Financiamento</div><div class="detail-value">${p.financing}</div></div>`;
+  if (p.property_type) detailsHtml += `<div class="detail-item"><div class="detail-label">Tipo</div><div class="detail-value">${p.property_type}</div></div>`;
+
+  const descHtml = p.details
+    ? `<div class="modal-desc">${p.details.replace(/\r\n/g,'<br>').replace(/\r/g,'<br>').replace(/\n/g,'<br>')}</div>` : '';
+
+  const videoHtml = videos.length
+    ? `<div class="modal-video"><h3>Vídeo do imóvel</h3>${videos.map(v => `<video controls><source src="${v}"></video>`).join('')}</div>` : '';
+
+  body.innerHTML = `
+    <div class="modal-badge-row">
+      <span class="modal-badge ${badgeClass}">${badgeLabel}</span>
+    </div>
+    <h2 class="modal-title">${p.titulo || 'Imóvel'}</h2>
+    ${locationText ? `<div class="modal-location"> ${locationText}</div>` : ''}
+    <div class="modal-price ${hasPrice ? '' : 'consulta'}">${price}</div>
+    ${detailsHtml ? `<div class="modal-details">${detailsHtml}</div>` : ''}
+    ${descHtml}
+    ${videoHtml}
+    <div class="modal-actions">
+      <a class="btn-wa" href="${waLink}" target="_blank" rel="noopener"> Falar com corretor</a>
+      <a class="btn-share" href="/imovel/${p.id}" target="_blank" rel="noopener"> Ver página do imóvel</a>
+      <button class="btn-copy" onclick="navigator.clipboard.writeText('https://socasatop.com.br/imovel/${p.id}').then(()=>{this.textContent=' Link copiado!';setTimeout(()=>{this.textContent=' Copiar link'},2000)})"> Copiar link</button>
+      <div class="share-row">
+        <a class="btn-share-icon whatsapp-share" href="https://wa.me/?text=${encodeURIComponent(p.titulo + ' - ' + price + ' %0Ahttps://socasatop.com.br/imovel/' + p.id)}" target="_blank" rel="noopener"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg> WhatsApp</a>
+        <a class="btn-share-icon email-share" href="mailto:?subject=${encodeURIComponent('Imóvel: ' + p.titulo)}&body=${encodeURIComponent(p.titulo + ' - ' + price + '%0A%0AVeja mais: https://socasatop.com.br/imovel/' + p.id)}" target="_blank"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg> E-mail</a>
+        <button class="btn-share-icon native-share" onclick="if(navigator.share){navigator.share({title:this.closest('.modal').querySelector('.modal-title').textContent,text:'Só Casa Top',url:'https://socasatop.com.br/imovel/${p.id}'})}else{navigator.clipboard.writeText('https://socasatop.com.br/imovel/${p.id}').then(function(){alert('Link copiado!')})}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg> Compartilhar</button>
+      </div>
+      </div>`;
+
+  overlay.classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeModal() {
+  document.getElementById('modal-overlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+function setGalleryIdx(idx) {
+  const gallery = document.getElementById('modalGallery');
+  const thumbs = document.getElementById('modalThumbs').querySelectorAll('.thumb');
+  const items = gallery.querySelectorAll('img, video');
+  if (items[galleryIdx]) items[galleryIdx].classList.remove('active');
+  if (thumbs[galleryIdx]) thumbs[galleryIdx].classList.remove('active');
+  galleryIdx = (idx + galleryItems.length) % galleryItems.length;
+  if (items[galleryIdx]) items[galleryIdx].classList.add('active');
+  if (thumbs[galleryIdx]) thumbs[galleryIdx].classList.add('active');
+  updateGalleryCounter();
+}
+
+function galleryNav(dir) { setGalleryIdx(galleryIdx + dir); }
+
+function updateGalleryCounter() {
+  const el = document.getElementById('galleryCounter');
+  if (galleryItems.length > 1) {
+    el.textContent = (galleryIdx + 1) + ' / ' + galleryItems.length;
+    el.style.display = '';
+  } else {
+    el.style.display = 'none';
+  }
+}
+
+// ── HELPERS ──
+function getPhotos(p) {
+  if (!p.images || !Array.isArray(p.images)) return [];
+  return p.images.filter(u => u && PHOTO_RE.test(u));
+}
+function getVideos(p) {
+  if (!p.images || !Array.isArray(p.images)) return [];
+  return p.images.filter(u => u && VIDEO_RE.test(u));
+}
+function parsePrice(p) {
+  return parseFloat(String(p.amount || '0').replace(/[^\d.]/g, '')) || 0;
+}
+function formatCurrency(val) {
+  const n = parseFloat(String(val || '0').replace(/[^\d.]/g, ''));
+  if (!n) return '—';
+  return 'R$ ' + n.toLocaleString('pt-BR', { minimumFractionDigits: 0 });
+}
+function formatPrice(p) {
+  if (!p.amount) return 'Sob consulta';
+  const n = parseFloat(String(p.amount).replace(/[^\d.]/g, ''));
+  if (!n) return 'Sob consulta';
+  const offer = (p.offer_type || '').toLowerCase();
+  const suffix = offer === 'aluguel' ? '/mês' : '';
+  return 'R$ ' + n.toLocaleString('pt-BR', { minimumFractionDigits: 0 }) + suffix;
+}
+
+// ── SEARCH EXPAND ──
+const searchInput = document.getElementById('search-input');
+const filtersExpanded = document.getElementById('filtersExpanded');
+
+searchInput.addEventListener('focus', () => filtersExpanded.classList.add('open'));
+searchInput.addEventListener('input', () => applyFilters());
+
+document.addEventListener('click', e => {
+  const sec = document.getElementById('search-section');
+  if (!sec.contains(e.target)) filtersExpanded.classList.remove('open');
+});
+
+// Filter change listeners
+['fOffer','fType','fLocation','fBeds'].forEach(id => {
+  document.getElementById(id).addEventListener('change', applyFilters);
+});
+
+// ── MODAL CLOSE ──
+document.getElementById('modal-overlay').addEventListener('click', e => {
+  if (e.target === document.getElementById('modal-overlay')) closeModal();
+});
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeModal();
+  if (document.getElementById('modal-overlay').classList.contains('open')) {
+    if (e.key === 'ArrowLeft') galleryNav(-1);
+    if (e.key === 'ArrowRight') galleryNav(1);
+  }
+});
+
+// ── NAV SCROLL ──
+window.addEventListener('scroll', () => {
+  document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 60);
+}, { passive: true });
+
+// ── INIT ──
+loadProperties();
+
+// Share button handlers (event delegation to avoid quote issues in inline onclick)
+document.addEventListener('click', function(e) {
+  var btn = e.target.closest('.copy-link-btn');
+  if (btn) {
+    e.stopPropagation();
+    var url = btn.getAttribute('data-url');
+    navigator.clipboard.writeText(url).then(function() {
+      var orig = btn.innerHTML;
+      btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#25d366" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>';
+      setTimeout(function() { btn.innerHTML = orig; }, 1500);
+    });
+    return;
+  }
+  btn = e.target.closest('.native-share-btn');
+  if (btn) {
+    e.stopPropagation();
+    if (navigator.share) {
+      navigator.share({ title: btn.getAttribute('data-title'), url: btn.getAttribute('data-url') });
+    } else {
+      navigator.clipboard.writeText(btn.getAttribute('data-url')).then(function() { alert('Link copiado!'); });
+    }
+  }
+});
+
+// -- LIGHTBOX --
+var lbPhotos = [];
+var lbIndex = 0;
+
+function openLightbox(photos, index) {
+  lbPhotos = photos;
+  lbIndex = index || 0;
+  document.getElementById('lightbox-img').src = lbPhotos[lbIndex];
+  document.getElementById('lightbox-counter').textContent = (lbIndex + 1) + ' / ' + lbPhotos.length;
+  document.getElementById('lightbox-overlay').classList.add('open');
+  document.getElementById('lightbox-nav').style.display = lbPhotos.length > 1 ? 'flex' : 'none';
+  document.body.style.overflow = 'hidden';
+}
+function closeLightbox() {
+  document.getElementById('lightbox-overlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+function lightboxNext() {
+  lbIndex = (lbIndex + 1) % lbPhotos.length;
+  document.getElementById('lightbox-img').src = lbPhotos[lbIndex];
+  document.getElementById('lightbox-counter').textContent = (lbIndex + 1) + ' / ' + lbPhotos.length;
+}
+function lightboxPrev() {
+  lbIndex = (lbIndex - 1 + lbPhotos.length) % lbPhotos.length;
+  document.getElementById('lightbox-img').src = lbPhotos[lbIndex];
+  document.getElementById('lightbox-counter').textContent = (lbIndex + 1) + ' / ' + lbPhotos.length;
+}
+document.addEventListener('keydown', function(e) {
+  if (!document.getElementById('lightbox-overlay').classList.contains('open')) return;
+  if (e.key === 'Escape') closeLightbox();
+  if (e.key === 'ArrowRight') lightboxNext();
+  if (e.key === 'ArrowLeft') lightboxPrev();
+});
+
+</script>
+
+<!-- Lightbox -->
+<div id="lightbox-overlay" onclick="closeLightbox()">
+  <button id="lightbox-close" onclick="closeLightbox()"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+  <img id="lightbox-img" src="" alt="" onclick="event.stopPropagation()">
+  <div id="lightbox-counter"></div>
+  <div id="lightbox-nav" onclick="event.stopPropagation()">
+    <button onclick="lightboxPrev()"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg></button>
+    <button onclick="lightboxNext()"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 6 15 12 9 18"/></svg></button>
+  </div>
+</div>
+</body>
+</html>
