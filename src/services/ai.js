@@ -186,4 +186,32 @@ function extractLeadData(conversation) {
   return { offer_type: offerType, property_type: propertyType, bedrooms, budget, location };
 }
 
-module.exports = { processMessage, extractLeadData };
+async function rawCompletion(prompt, opts = {}) {
+  const payload = JSON.stringify({
+    model: opts.model || 'gpt-4o',
+    messages: [
+      { role: 'system', content: opts.system || 'Responda apenas com JSON valido, sem explicacoes nem markdown.' },
+      { role: 'user', content: prompt },
+    ],
+    max_tokens: opts.max_tokens || 1500,
+    temperature: opts.temperature != null ? opts.temperature : 0.3,
+  });
+
+  const payloadFile = '/tmp/openai_raw_payload.json';
+  require('fs').writeFileSync(payloadFile, payload);
+
+  const cmd = `curl -s --connect-timeout 5 --max-time 60 -X POST "https://api.openai.com/v1/chat/completions" -H "Authorization: Bearer ${process.env.OPENAI_API_KEY}" -H "Content-Type: application/json" -d @${payloadFile} 2>/dev/null`;
+  let result = '';
+  try {
+    result = execSync(cmd, { encoding: 'utf-8', timeout: 65000, stdio: ['pipe', 'pipe', 'pipe'] });
+  } catch (e) {
+    result = e.stdout || '';
+  }
+
+  if (!result || !result.trim()) throw new Error('OpenAI request failed');
+  const data = JSON.parse(result);
+  if (data.error) throw new Error(data.error.message);
+  return data.choices[0].message.content;
+}
+
+module.exports = { processMessage, extractLeadData, rawCompletion };

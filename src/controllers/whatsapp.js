@@ -134,6 +134,15 @@ async function receive(req, res) {
 
     const lower = userText.toLowerCase().trim();
 
+    // Sprint 1 commands dispatcher (wizards + management)
+    try {
+      const commandsService = require('../services/commands');
+      const handled = await commandsService.tryHandleCommand(from, userText);
+      if (handled) return;
+    } catch (e) {
+      console.log('commands dispatch error:', e.message);
+    }
+
     // Handle ongoing cadastro corretor mode (ADM only)
     if (cadastroCorretorMode.has(from)) {
       await handleCadastroCorretor(from, userText);
