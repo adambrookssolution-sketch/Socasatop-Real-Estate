@@ -8,6 +8,8 @@ async function listar(req, res) {
     .from('imoveis')
     .select('*', { count: 'exact' })
     .eq('ativo', true)
+    .or('visibility.is.null,visibility.eq.explicito')
+    .or('status.is.null,status.eq.publicado,status.eq.vinculado')
     .range(offset, offset + limit - 1)
     .order('amount', { ascending: true });
 
