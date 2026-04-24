@@ -125,6 +125,11 @@ async function batchAction(req, res) {
     const { data, error } = await query.select('id');
     if (error) throw error;
 
+    const invalidate = req.app && req.app.locals && req.app.locals.invalidateImovelCache;
+    if (invalidate && data) {
+      for (const r of data) invalidate(r.id);
+    }
+
     res.json({ success: true, updated: (data || []).length, ids: (data || []).map(r => r.id) });
   } catch (e) {
     res.status(500).json({ error: e.message });
@@ -148,6 +153,11 @@ async function askCuradoria(req, res) {
       .update({ curadoria_requested: requested, status: newStatus })
       .in('id', imovel_ids);
     if (error) throw error;
+
+    const invalidate = req.app && req.app.locals && req.app.locals.invalidateImovelCache;
+    if (invalidate) {
+      for (const id of imovel_ids) invalidate(id);
+    }
 
     res.json({ success: true, curadoria_requested: requested });
   } catch (e) {

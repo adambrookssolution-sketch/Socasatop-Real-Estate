@@ -38,12 +38,31 @@ app.use('/galeria', galeriaRoutes.pageRouter);
 const { renderImovel } = require('./views/imovel');
 const supabaseView = require('./config/supabase');
 const imovelCache = new Map();
+const IMOVEL_CACHE_TTL = 60 * 1000;
+
+function invalidateImovelCache(id) {
+  if (id === undefined || id === null) {
+    imovelCache.clear();
+    return;
+  }
+  imovelCache.delete(String(id));
+}
+app.locals.invalidateImovelCache = invalidateImovelCache;
+
+app.post('/api/_cache/invalidate', (req, res) => {
+  invalidateImovelCache();
+  res.json({ success: true });
+});
+app.post('/api/_cache/invalidate/:id', (req, res) => {
+  invalidateImovelCache(req.params.id);
+  res.json({ success: true });
+});
 
 app.get('/imovel/:id', async (req, res) => {
   const id = req.params.id;
 
   const cached = imovelCache.get(id);
-  if (cached && Date.now() - cached.time < 300000) {
+  if (cached && Date.now() - cached.time < IMOVEL_CACHE_TTL) {
     return res.send(cached.html);
   }
 
@@ -51,8 +70,8 @@ app.get('/imovel/:id', async (req, res) => {
     const { data, error } = await supabaseView.from('imoveis').select('*').eq('id', id).single();
     if (error || !data) return res.status(404).send('<h1>Imovel nao encontrado</h1>');
 
-    // Block if hidden or not published
     if (data.ativo === false || data.visibility === 'oculto' || (data.status && !['publicado', 'vinculado'].includes(data.status))) {
+      imovelCache.delete(id);
       return res.status(404).send('<h1>Imovel nao disponivel</h1>');
     }
 

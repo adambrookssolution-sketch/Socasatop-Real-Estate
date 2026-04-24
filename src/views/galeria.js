@@ -90,7 +90,7 @@ function render(session) {
   <button onclick="doAction('visibility', { visibility: 'oculto' })">Oculto</button>
   <button onclick="askCuradoria()">Curadoria IA?</button>
   <button class="primary" onclick="doAction('publicar')">Publicar</button>
-  ${role === 'adm' ? '<button class="danger" onclick="doAction(\\'excluir\\')">Excluir</button>' : ''}
+  ${role === 'adm' ? '<button class="danger" onclick="doAction(&quot;excluir&quot;)">Excluir</button>' : ''}
   <span class="flex-grow"></span>
   <button onclick="clearSelection()">Limpar</button>
 </div>

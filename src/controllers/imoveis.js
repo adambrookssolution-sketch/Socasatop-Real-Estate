@@ -1,5 +1,17 @@
 const supabase = require('../config/supabase');
 
+let _visibilityColumnExists = null;
+async function hasVisibilityColumn() {
+  if (_visibilityColumnExists !== null) return _visibilityColumnExists;
+  try {
+    const { error } = await supabase.from('imoveis').select('visibility').limit(1);
+    _visibilityColumnExists = !error;
+  } catch (e) {
+    _visibilityColumnExists = false;
+  }
+  return _visibilityColumnExists;
+}
+
 async function listar(req, res) {
   const { offer_type, property_type, location, bedrooms, min_price, max_price, page = 1, limit = 20 } = req.query;
   const offset = (page - 1) * limit;
@@ -8,10 +20,13 @@ async function listar(req, res) {
     .from('imoveis')
     .select('*', { count: 'exact' })
     .eq('ativo', true)
-    .or('visibility.is.null,visibility.eq.explicito')
-    .or('status.is.null,status.eq.publicado,status.eq.vinculado')
     .range(offset, offset + limit - 1)
     .order('amount', { ascending: true });
+
+  if (await hasVisibilityColumn()) {
+    query = query.or('visibility.is.null,visibility.eq.explicito');
+    query = query.or('status.is.null,status.eq.publicado,status.eq.vinculado');
+  }
 
   if (offer_type) {
     const ot = offer_type.toLowerCase();
