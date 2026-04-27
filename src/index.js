@@ -30,6 +30,13 @@ app.use('/api/gestores', require('./routes/gestores'));
 app.use('/api/import', require('./routes/import'));
 app.use('/api/curadoria', require('./routes/curadoria'));
 app.use('/api/creditos', require('./routes/creditos'));
+app.use('/api/regioes', require('./routes/regioes'));
+app.use('/api/parceiros', require('./routes/parceiros'));
+app.use('/webhook', require('./routes/webhooks_pagamentos'));
+
+const landingView = require('./views/landing');
+app.get('/parceiros', (req, res) => res.send(landingView.render()));
+app.get('/seja-parceiro', (req, res) => res.send(landingView.render()));
 
 // Galeria (token-based management UI)
 const galeriaRoutes = require('./routes/galeria');
