@@ -2,15 +2,22 @@ function render() {
   const HERO_IMAGES = [
     'https://socasatop.com.br/wp-content/uploads/2025/03/2025_03_07-SMPW_05_02_06_B-0939-HDR.png',
     'https://socasatop.com.br/wp-content/uploads/2025/08/CASA-15-14-07-LAGO-SUL.poster.jpg',
-    'https://socasatop.com.br/wp-content/uploads/2024/07/IMG_8581-3.jpeg',
+    'https://socasatop.com.br/wp-content/uploads/2025/03/2025_03_07-SMPW_05_02_06_B-0924-HDR.jpg',
+  ];
+  const ABOUT_IMAGES = [
+    'https://socasatop.com.br/wp-content/uploads/2024/07/d43d62014668a64853add09be76150d3.jpg',
+    'https://socasatop.com.br/wp-content/uploads/2025/03/2025_03_07-SMPW_05_02_06_B-0924-HDR.jpg',
   ];
   const GALLERY = [
+    'https://socasatop.com.br/wp-content/uploads/2024/07/d43d62014668a64853add09be76150d3.jpg',
     'https://socasatop.com.br/wp-content/uploads/2025/03/2025_03_07-SMPW_05_02_06_B-0924-HDR.jpg',
-    'https://socasatop.com.br/wp-content/uploads/2025/08/CASA-15-14-07-LAGO-SUL.poster.jpg',
     'https://socasatop.com.br/wp-content/uploads/2025/03/2025_03_07-SMPW_05_02_06_B-0939-HDR.png',
-    'https://socasatop.com.br/wp-content/uploads/2024/07/IMG_8581-3.jpeg',
-    'https://socasatop.com.br/wp-content/uploads/2024/06/4roO7S8wgFadKqf3Pk4.jpg',
-    'https://socasatop.com.br/wp-content/uploads/2025/12/WhatsApp-Video-2025-12-16-at-15.41.27.jpg',
+    'https://socasatop.com.br/wp-content/uploads/2026/02/6026057414.jpg',
+    'https://socasatop.com.br/wp-content/uploads/2026/02/6b710f08d322f126be7ec08a83b38872-1.jpg',
+    'https://socasatop.com.br/wp-content/uploads/2025/04/WhatsApp-Image-2025-04-30-at-11.49.49-3.jpeg',
+    'https://socasatop.com.br/wp-content/uploads/2025/08/VK4897024-1024x682.jpg',
+    'https://socasatop.com.br/wp-content/uploads/2025/08/34c3dc71698646e1a036ce9c581f201d.jpg',
+    'https://socasatop.com.br/wp-content/uploads/2026/01/WhatsApp-Image-2026-01-14-at-08.48.38-1.jpeg',
   ];
 
   return `<!DOCTYPE html>
@@ -100,9 +107,8 @@ nav .container { display: flex; align-items: center; justify-content: space-betw
 
 /* ABOUT */
 .about-grid { display: grid; grid-template-columns: 1.1fr 1fr; gap: 64px; align-items: center; }
-.about-images { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; position: relative; }
-.about-images img { width: 100%; aspect-ratio: 3/4; object-fit: cover; border-radius: 14px; box-shadow: 0 20px 50px -20px rgba(0,0,0,0.25); transition: transform 0.5s; }
-.about-images img:nth-child(2) { margin-top: 40px; }
+.about-images { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; position: relative; align-items: stretch; }
+.about-images img { width: 100%; aspect-ratio: 3/4; object-fit: cover; border-radius: 14px; box-shadow: 0 20px 50px -20px rgba(0,0,0,0.25); transition: transform 0.5s; display: block; }
 .about-images img:hover { transform: translateY(-8px); }
 .about-text h2 { font-family: 'Playfair Display', serif; font-size: clamp(2rem, 3.5vw, 2.8rem); font-weight: 700; line-height: 1.15; margin-bottom: 20px; }
 .about-text h2 em { color: var(--gold); font-style: italic; }
@@ -300,8 +306,8 @@ footer a { color: var(--gold); text-decoration: none; }
   <div class="container">
     <div class="about-grid">
       <div class="about-images reveal">
-        <img src="${GALLERY[0]}" alt="Imovel So Casa Top" loading="lazy">
-        <img src="${GALLERY[1]}" alt="Imovel So Casa Top" loading="lazy">
+        <img src="${ABOUT_IMAGES[0]}" alt="Imovel So Casa Top" loading="lazy">
+        <img src="${ABOUT_IMAGES[1]}" alt="Imovel So Casa Top" loading="lazy">
       </div>
       <div class="about-text reveal">
         <span class="section-tag">O que e o So Casa Top</span>
@@ -335,7 +341,7 @@ footer a { color: var(--gold); text-decoration: none; }
         <div class="insta-stat"><div class="insta-stat-num">340 mil</div><div class="insta-stat-label">Visualizacoes/mes</div></div>
       </div>
       <div class="insta-grid">
-        ${GALLERY.map(url => `<img src="${url}" alt="Imovel destaque" loading="lazy">`).join('')}
+        ${GALLERY.map(url => `<img src="${url}" alt="Imovel destaque" loading="lazy" onerror="this.style.display='none'">`).join('')}
       </div>
     </div>
   </div>
