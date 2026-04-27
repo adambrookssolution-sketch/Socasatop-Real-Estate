@@ -3,6 +3,8 @@ const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
 const aiService = require('./ai');
+let browserScraper = null;
+try { browserScraper = require('./browser_scraper'); } catch (e) { /* optional */ }
 
 const UPLOAD_DIR = process.env.IMPORT_UPLOAD_DIR || '/root/socasatop/wp-images/wp-content/uploads/imported';
 
@@ -10,18 +12,56 @@ function ensureDir(p) {
   if (!fs.existsSync(p)) fs.mkdirSync(p, { recursive: true });
 }
 
-async function fetchHTML(url) {
-  const response = await axios.get(url, {
-    timeout: 30000,
-    headers: {
-      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-      'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-      'Accept-Language': 'pt-BR,pt;q=0.9,en;q=0.8',
-    },
-    maxRedirects: 5,
-    validateStatus: s => s < 500,
-  });
-  return response.data;
+function needsBrowser(html) {
+  if (!html || typeof html !== 'string') return true;
+  if (/just a moment|checking your browser|attention required|cf-browser-verification|challenges\.cloudflare\.com|ddos protection|verifying you are human/i.test(html)) return true;
+  if (html.length < 3000) return true;
+  const hasContent = /<article|<section|<main|class=["'][^"']*(card|listing|property|imovel|result)[^"']*["']/i.test(html);
+  const hasSpaMarker = /<div\s+id=["']?(root|app|__next|__nuxt)/i.test(html);
+  if (hasSpaMarker && !hasContent) return true;
+  return false;
+}
+
+async function fetchHTML(url, opts = {}) {
+  const allowBrowser = opts.allowBrowser !== false;
+  try {
+    const response = await axios.get(url, {
+      timeout: 30000,
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+        'Accept-Language': 'pt-BR,pt;q=0.9,en;q=0.8',
+        'Accept-Encoding': 'gzip, deflate, br',
+        'Cache-Control': 'no-cache',
+        'Pragma': 'no-cache',
+        'Sec-Fetch-Dest': 'document',
+        'Sec-Fetch-Mode': 'navigate',
+        'Sec-Fetch-Site': 'none',
+        'Sec-Fetch-User': '?1',
+        'Upgrade-Insecure-Requests': '1',
+      },
+      maxRedirects: 5,
+      validateStatus: s => s < 500,
+    });
+    const html = response.data;
+    if (allowBrowser && browserScraper && needsBrowser(html)) {
+      try {
+        const result = await browserScraper.fetchRenderedHTML(url);
+        if (result && result.html && result.html.length > (html?.length || 0)) {
+          return result.html;
+        }
+      } catch (e) { /* fallback to axios result */ }
+    }
+    return html;
+  } catch (e) {
+    if (allowBrowser && browserScraper) {
+      try {
+        const result = await browserScraper.fetchRenderedHTML(url);
+        if (result && result.html) return result.html;
+      } catch (err) { /* rethrow original */ }
+    }
+    throw e;
+  }
 }
 
 function stripHTML(html) {

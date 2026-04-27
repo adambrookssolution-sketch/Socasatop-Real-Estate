@@ -1,20 +1,43 @@
 const supabase = require('../config/supabase');
 const scraper = require('../services/scraper');
 
+const MIN_PRICE = Number(process.env.MIN_PRICE || 1500000);
+
 async function importFromUrl(url, importedByPhone) {
-  const result = await scraper.scrapeUrl(url);
+  let result;
+  try {
+    result = await scraper.scrapeUrl(url);
+  } catch (e) {
+    return { success: false, imported: 0, duplicates: 0, errors: 1, below_min: 0, message: 'Erro ao acessar a pagina: ' + e.message };
+  }
 
   if (!result.properties || result.properties.length === 0) {
-    return { success: false, imported: 0, duplicates: 0, errors: 0, message: 'Nenhum imovel encontrado na pagina.' };
+    let msg = 'Nenhum imovel encontrado nesta pagina.';
+    if (result.type === 'listing') {
+      msg += '\n\nA pagina parece ser de listagem mas usa JavaScript para carregar os imoveis (SPA). ';
+      msg += 'Tente enviar a URL de um imovel especifico (pagina de detalhe).';
+    } else if (result.type === 'unknown') {
+      msg += '\n\nO site pode estar bloqueando scraping (Cloudflare) ou nao ter conteudo legivel. ';
+      msg += 'Tente a URL de um anuncio individual.';
+    }
+    return { success: false, imported: 0, duplicates: 0, errors: 0, below_min: 0, message: msg };
   }
 
   let imported = 0;
   let duplicates = 0;
   let errors = 0;
+  let belowMin = 0;
   const importedIds = [];
 
   for (const prop of result.properties) {
     try {
+      const priceNum = prop.preco != null ? Number(prop.preco) : null;
+      const isAluguel = prop.offer_type && /alug/i.test(prop.offer_type);
+      if (!isAluguel && priceNum != null && priceNum > 0 && priceNum < MIN_PRICE) {
+        belowMin++;
+        continue;
+      }
+
       if (prop.source_url) {
         const { data: existing } = await supabase
           .from('imoveis')
@@ -73,6 +96,8 @@ async function importFromUrl(url, importedByPhone) {
     imported,
     duplicates,
     errors,
+    below_min: belowMin,
+    min_price: MIN_PRICE,
     total: result.properties.length,
     type: result.type,
     ids: importedIds,

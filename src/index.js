@@ -28,6 +28,8 @@ app.use('/api/corretores', require('./routes/corretores'));
 app.use('/api/imobiliarias', require('./routes/imobiliarias'));
 app.use('/api/gestores', require('./routes/gestores'));
 app.use('/api/import', require('./routes/import'));
+app.use('/api/curadoria', require('./routes/curadoria'));
+app.use('/api/creditos', require('./routes/creditos'));
 
 // Galeria (token-based management UI)
 const galeriaRoutes = require('./routes/galeria');

@@ -270,7 +270,14 @@ async function handleImportar(from, userText) {
       msg += 'Total encontrado: ' + (result.total || 0) + '\n';
       msg += 'Importados: ' + result.imported + '\n';
       msg += 'Duplicados (ignorados): ' + result.duplicates + '\n';
+      if (result.below_min && result.below_min > 0) {
+        const minFmt = 'R$ ' + Number(result.min_price || 1500000).toLocaleString('pt-BR');
+        msg += 'Abaixo do valor minimo (' + minFmt + '): ' + result.below_min + '\n';
+      }
       msg += 'Erros: ' + result.errors + '\n\n';
+      if (result.message) {
+        msg += result.message + '\n\n';
+      }
       if (result.imported > 0) {
         msg += 'Use "galeria" para abrir a galeria e vincular corretores.';
       }
@@ -449,6 +456,13 @@ async function handleHelp(from) {
     msg += '- aprovar [ID] / rejeitar [ID]\n';
     msg += '- cancelar (durante cadastro)\n';
   }
+  if (role.role === 'adm' || role.role === 'gestor' || role.role === 'corretor') {
+    msg += '\nCuradoria com IA:\n';
+    msg += '- curar [ID] [descricao|imagens|completa]\n';
+    msg += '- aprovar job [ID] / rejeitar job [ID]\n';
+    msg += '- saldo (ver creditos)\n';
+    msg += '- pacotes (ver opcoes de compra)\n';
+  }
   msg += '\nCanais: site, instagram, campanhas, privado';
   await send(from, msg);
   return true;
@@ -480,7 +494,124 @@ async function tryHandleCommand(from, userText) {
   if (await handleVisibility(from, t)) return true;
   if (await handleAprovacao(from, t)) return true;
 
+  if (/^(curar|curadoria)\s+\d+/i.test(t)) return await handleCurar(from, t);
+  if (lower === 'saldo' || lower === 'creditos') return await handleSaldo(from);
+  if (lower === 'pacotes') return await handlePacotes(from);
+  if (/^aprovar\s+job\s+\d+/i.test(t)) return await handleAprovarJob(from, t);
+  if (/^rejeitar\s+job\s+\d+/i.test(t)) return await handleRejeitarJob(from, t);
+
   return false;
+}
+
+async function handleCurar(from, text) {
+  const m = text.match(/^(?:curar|curadoria)\s+(\d+)(?:\s+(descricao|descrição|imagens|completa))?/i);
+  if (!m) {
+    await send(from, 'Use: curar [ID] [tipo]\nTipos: descricao, imagens, completa\nEx: curar 264 completa');
+    return true;
+  }
+  const id = parseInt(m[1]);
+  let tipo = (m[2] || 'completa').toLowerCase().replace('descrição', 'descricao');
+
+  try {
+    const curadoriaCtrl = require('../controllers/curadoria');
+    const r = await curadoriaCtrl.solicitarCuradoria({ phone: from, imovelId: id, tipo });
+    await send(from, 'Curadoria solicitada!\nJob #' + r.job_id + '\nTipo: ' + r.tipo + '\nCusto: ' + r.custo + ' creditos\n\nProcessando em background. Voce sera notificado quando estiver pronto.');
+
+    setImmediate(async () => {
+      const start = Date.now();
+      while (Date.now() - start < 5 * 60 * 1000) {
+        await new Promise(r => setTimeout(r, 5000));
+        const job = await curadoriaCtrl.getJob(r.job_id);
+        if (!job) break;
+        if (job.status === 'pronto') {
+          await send(from, 'Curadoria pronta para Job #' + r.job_id + ' (Imovel ' + id + ')!\n\nUse:\n- "aprovar job ' + r.job_id + '" para aplicar\n- "rejeitar job ' + r.job_id + '" para descartar (reembolsa creditos)');
+          break;
+        }
+        if (job.status === 'erro') {
+          await send(from, 'Curadoria falhou: ' + (job.erro_msg || 'erro desconhecido') + '\nCreditos nao foram debitados.');
+          break;
+        }
+      }
+    });
+  } catch (e) {
+    await send(from, 'Erro: ' + e.message);
+  }
+  return true;
+}
+
+async function handleSaldo(from) {
+  const creditos = require('./creditos');
+  const permissions = require('./permissions');
+  let parceiroTipo, parceiroId;
+  if (permissions.isADM(from)) {
+    await send(from, 'Voce e ADM, sem limite de creditos.');
+    return true;
+  }
+  const gestor = await permissions.getGestor(from);
+  if (gestor) { parceiroTipo = 'gestor'; parceiroId = gestor.id; }
+  else {
+    const corretor = await permissions.getCorretor(from);
+    if (corretor) { parceiroTipo = 'corretor'; parceiroId = corretor.id; }
+  }
+  if (!parceiroTipo) { await send(from, 'Voce nao e um parceiro cadastrado.'); return true; }
+
+  const s = await creditos.getSaldo(parceiroTipo, parceiroId);
+  let msg = 'Saldo atual: ' + (s.creditos_disponiveis || 0) + ' creditos';
+  if (s.validade_at) {
+    const data = new Date(s.validade_at).toLocaleDateString('pt-BR');
+    msg += '\nValidade: ' + data;
+  }
+  if (s.expirado) msg += '\n(creditos anteriores expiraram)';
+  msg += '\n\nUse "pacotes" para ver opcoes de compra.';
+  await send(from, msg);
+  return true;
+}
+
+async function handlePacotes(from) {
+  const creditos = require('./creditos');
+  const data = await creditos.listarPacotes();
+  if (!data || data.length === 0) { await send(from, 'Nenhum pacote disponivel.'); return true; }
+  let msg = 'Pacotes de creditos:\n';
+  for (const p of data) {
+    const preco = (p.preco_centavos / 100).toLocaleString('pt-BR', { minimumFractionDigits: 2 });
+    msg += '\n[' + p.id + '] ' + p.nome + ' - ' + p.imagens + ' imagens - R$ ' + preco + ' (validade ' + p.validade_dias + ' dias)';
+  }
+  msg += '\n\nA compra estara disponivel apos integracao com PagBank (Sprint 3).';
+  await send(from, msg);
+  return true;
+}
+
+async function handleAprovarJob(from, text) {
+  const m = text.match(/^aprovar\s+job\s+(\d+)/i);
+  if (!m) return false;
+  const jobId = parseInt(m[1]);
+  try {
+    const curadoriaCtrl = require('../controllers/curadoria');
+    const r = await curadoriaCtrl.aprovarJob(jobId, from);
+    let msg = 'Job #' + jobId + ' aprovado e aplicado.';
+    if (r.updates) {
+      const keys = Object.keys(r.updates);
+      if (keys.length > 0) msg += '\nCampos atualizados: ' + keys.join(', ');
+    }
+    await send(from, msg);
+  } catch (e) {
+    await send(from, 'Erro: ' + e.message);
+  }
+  return true;
+}
+
+async function handleRejeitarJob(from, text) {
+  const m = text.match(/^rejeitar\s+job\s+(\d+)/i);
+  if (!m) return false;
+  const jobId = parseInt(m[1]);
+  try {
+    const curadoriaCtrl = require('../controllers/curadoria');
+    await curadoriaCtrl.rejeitarJob(jobId, from);
+    await send(from, 'Job #' + jobId + ' rejeitado. Creditos reembolsados (se aplicavel).');
+  } catch (e) {
+    await send(from, 'Erro: ' + e.message);
+  }
+  return true;
 }
 
 module.exports = { tryHandleCommand, getWizard, clearWizard };
