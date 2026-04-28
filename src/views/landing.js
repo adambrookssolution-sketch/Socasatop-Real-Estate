@@ -26,10 +26,10 @@ function render() {
 <meta charset="UTF-8">
 <link rel="icon" href="data:,">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>So Casa Top - Parceiros Fundadores</title>
-<meta name="description" content="Seja um dos 5 parceiros fundadores da sua regiao. R$ 497/mes vitalicio. Antes que sua concorrencia ocupe o seu lugar.">
-<meta property="og:title" content="So Casa Top - Parceria Fundadores">
-<meta property="og:description" content="5 vagas por regiao em Brasilia. 66 mil seguidores no Instagram. 340 mil visualizacoes/mes.">
+<title>Só Casa Top - Parceiros Fundadores</title>
+<meta name="description" content="Entre para os 5 parceiros oficiais da sua região no Só Casa Top. Receba clientes qualificados todos os dias direto no WhatsApp.">
+<meta property="og:title" content="Só Casa Top - Parceria Fundadores">
+<meta property="og:description" content="5 vagas oficiais por região em Brasília. 66 mil seguidores no Instagram. Clientes qualificados todos os dias.">
 <meta property="og:image" content="${HERO_IMAGES[0]}">
 <meta property="og:type" content="website">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,600&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -138,7 +138,8 @@ nav .container { display: flex; align-items: center; justify-content: space-betw
 .receive-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; }
 .receive-card { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 28px; transition: all 0.3s; }
 .receive-card:hover { border-color: rgba(201,169,110,0.4); transform: translateY(-4px); background: rgba(255,255,255,0.06); }
-.receive-icon { width: 48px; height: 48px; border-radius: 12px; background: rgba(201,169,110,0.15); display: flex; align-items: center; justify-content: center; margin-bottom: 18px; color: var(--gold); font-size: 22px; font-weight: 700; }
+.receive-icon { width: 48px; height: 48px; border-radius: 12px; background: rgba(201,169,110,0.15); display: flex; align-items: center; justify-content: center; margin-bottom: 18px; color: var(--gold); }
+.receive-icon svg { width: 22px; height: 22px; }
 .receive-card h3 { font-size: 18px; font-weight: 600; margin-bottom: 8px; color: #fff; }
 .receive-card p { color: rgba(255,255,255,0.65); font-size: 14px; }
 
@@ -281,13 +282,13 @@ footer a { color: var(--gold); text-decoration: none; }
 <body>
 
 <div class="alert-banner">
-  Lago Sul: VAGAS ESGOTADAS | Outras regioes em fase final de preenchimento
+  Lago Sul: VAGAS ESGOTADAS &nbsp;&middot;&nbsp; Outras regiões em fase final de preenchimento
 </div>
 
 <nav>
   <div class="container">
-    <div class="logo">So<span>Casa</span>Top</div>
-    <a href="#vagas" class="btn btn-outline">Ver Vagas</a>
+    <div class="logo">Só<span>Casa</span>Top</div>
+    <a href="#vagas" class="btn btn-primary">Quero ser parceiro</a>
   </div>
 </nav>
 
@@ -296,20 +297,20 @@ footer a { color: var(--gold); text-decoration: none; }
     ${HERO_IMAGES.map((url, i) => `<div class="slide${i === 0 ? ' active' : ''}" style="background-image:url('${url}')"></div>`).join('')}
   </div>
   <div class="container">
-    <span class="hero-tag">Programa Fundadores 2026</span>
-    <h1>Seja um dos <em>5 parceiros fundadores</em> da sua regiao no So Casa Top</h1>
-    <p class="lead">Antes que sua concorrencia ocupe o seu lugar. Estamos selecionando apenas 5 parceiros por regiao em Brasilia para integrar o ecossistema que esta redesenhando o mercado de alto padrao.</p>
-    <p class="warning">> Valor exclusivo Fundadores: R$ 497/mes (vitalicio - nunca mais sera oferecido)</p>
+    <span class="hero-tag">Programa Fundadores &middot; 2026</span>
+    <h1>Entre para os <em>5 parceiros oficiais</em> da sua região no Só Casa Top</h1>
+    <p class="lead">Receba clientes qualificados todos os dias &mdash; direto no seu WhatsApp.</p>
+    <p class="warning">Vagas limitadas por região &middot; R$ 497/mês vitalício para Fundadores</p>
     <div class="hero-cta">
-      <a href="#vagas" class="btn btn-primary btn-large btn-pulse">Garantir minha vaga</a>
-      <a href="#instagram" class="btn btn-outline btn-large">Ver nossos numeros</a>
+      <a href="#vagas" class="btn btn-primary btn-large btn-pulse">Quero garantir minha vaga</a>
+      <a href="#instagram" class="btn btn-outline btn-large">Ver nossos números</a>
     </div>
 
     <div class="hero-stats">
-      <div class="stat"><div class="stat-num">66.2K</div><div class="stat-label">Seguidores Instagram</div></div>
-      <div class="stat"><div class="stat-num">340K</div><div class="stat-label">Visualizacoes/mes</div></div>
-      <div class="stat"><div class="stat-num">2.3K</div><div class="stat-label">Posts publicados</div></div>
-      <div class="stat"><div class="stat-num">5</div><div class="stat-label">Vagas por regiao</div></div>
+      <div class="stat"><div class="stat-num">66,2 mil</div><div class="stat-label">Seguidores no Instagram</div></div>
+      <div class="stat"><div class="stat-num">340 mil</div><div class="stat-label">Visualizações por mês</div></div>
+      <div class="stat"><div class="stat-num">2.337</div><div class="stat-label">Imóveis publicados</div></div>
+      <div class="stat"><div class="stat-num">5</div><div class="stat-label">Vagas por região</div></div>
     </div>
   </div>
 </section>
@@ -322,10 +323,10 @@ footer a { color: var(--gold); text-decoration: none; }
         <img src="${ABOUT_IMAGES[1]}" alt="Imovel So Casa Top" loading="lazy">
       </div>
       <div class="about-text reveal">
-        <span class="section-tag">O que e o So Casa Top</span>
-        <h2>Voce nao entra para anunciar imoveis. <em>Voce entra para participar de um sistema</em> que gera demanda qualificada todos os dias.</h2>
-        <p>O So Casa Top e um <strong>ecossistema de geracao, qualificacao e conversao de leads</strong> de alto padrao com tecnologia e inteligencia artificial.</p>
-        <p>Nosso WhatsApp filtra cada lead com IA antes de chegar ao parceiro. Apenas leads reais, qualificados, com poder de compra. Voce nao perde tempo com curiosos.</p>
+        <span class="section-tag">O que é o Só Casa Top</span>
+        <h2>Você não entra para anunciar imóveis. <em>Você entra para participar de um sistema</em> que gera demanda qualificada todos os dias.</h2>
+        <p>O Só Casa Top é um <strong>ecossistema de geração, qualificação e conversão de leads</strong> de alto padrão com tecnologia e inteligência artificial.</p>
+        <p>Nosso WhatsApp filtra cada lead com IA antes de chegar ao parceiro. Apenas leads reais, qualificados, com poder de compra. Você não perde tempo com curiosos.</p>
         <a href="#vagas" class="btn btn-primary">Quero minha vaga</a>
       </div>
     </div>
@@ -336,21 +337,21 @@ footer a { color: var(--gold); text-decoration: none; }
   <div class="container">
     <div class="text-center" style="margin-bottom: 40px;">
       <span class="section-tag">Prova social</span>
-      <h2 class="section-title">A maior rede de imoveis de alto padrao do DF</h2>
-      <p class="section-subtitle">Numeros reais do Instagram oficial do So Casa Top</p>
+      <h2 class="section-title">A maior rede de imóveis de alto padrão do DF</h2>
+      <p class="section-subtitle">Números reais do Instagram oficial do Só Casa Top</p>
     </div>
     <div class="insta-card reveal">
       <div class="insta-header">
         <div class="insta-avatar">SC</div>
         <div class="insta-meta">
-          <h3>So Casa <span class="check">[v]</span></h3>
-          <div class="handle">@socasatop_bsb - Painel Profissional</div>
+          <h3>Só Casa <span class="check">&#10003;</span></h3>
+          <div class="handle">@socasatop_bsb &middot; Painel Profissional</div>
         </div>
       </div>
       <div class="insta-stats">
         <div class="insta-stat"><div class="insta-stat-num">2.337</div><div class="insta-stat-label">Posts</div></div>
         <div class="insta-stat"><div class="insta-stat-num">66,2 mil</div><div class="insta-stat-label">Seguidores</div></div>
-        <div class="insta-stat"><div class="insta-stat-num">340 mil</div><div class="insta-stat-label">Visualizacoes/mes</div></div>
+        <div class="insta-stat"><div class="insta-stat-num">340 mil</div><div class="insta-stat-label">Visualizações/mês</div></div>
       </div>
       <div class="insta-grid">
         ${GALLERY.map(url => `<img src="${url}" alt="Imovel destaque" loading="lazy" onerror="this.style.display='none'">`).join('')}
@@ -362,17 +363,41 @@ footer a { color: var(--gold); text-decoration: none; }
 <section class="section" id="receive">
   <div class="container">
     <div class="text-center">
-      <span class="section-tag">Beneficios</span>
-      <h2 class="section-title">O que voce recebe como parceiro fundador</h2>
-      <p class="section-subtitle">Tudo o que voce precisa para vender mais com menos esforco</p>
+      <span class="section-tag">Benefícios</span>
+      <h2 class="section-title">O que você recebe como parceiro fundador</h2>
+      <p class="section-subtitle">Tudo o que você precisa para vender mais com menos esforço</p>
     </div>
     <div class="receive-grid">
-      <div class="receive-card reveal"><div class="receive-icon">[L]</div><h3>Leads qualificados</h3><p>Apenas leads reais, filtrados pela IA antes de chegar ate voce.</p></div>
-      <div class="receive-card reveal"><div class="receive-icon">[D]</div><h3>Distribuicao inteligente</h3><p>Cada lead vai para o parceiro certo na regiao certa, automaticamente.</p></div>
-      <div class="receive-card reveal"><div class="receive-icon">[IA]</div><h3>IA de pre-qualificacao</h3><p>O bot conversa com o lead, entende a necessidade e qualifica antes de te entregar.</p></div>
-      <div class="receive-card reveal"><div class="receive-icon">[W]</div><h3>WhatsApp integrado</h3><p>O cliente fala direto com voce. Sem ferramentas externas, sem complicacao.</p></div>
-      <div class="receive-card reveal"><div class="receive-icon">[E]</div><h3>Exclusividade territorial</h3><p>Apenas 5 parceiros por regiao. Sua presenca e amplificada, nao diluida.</p></div>
-      <div class="receive-card reveal"><div class="receive-icon">[*]</div><h3>Posicionamento como autoridade</h3><p>Apareca como referencia local na maior plataforma de alto padrao do DF.</p></div>
+      <div class="receive-card reveal">
+        <div class="receive-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.663 17h4.673M12 3v1M3 12H2M22 12h-1M5.6 5.6l.7.7M18.4 5.6l-.7.7M12 17a5 5 0 1 1 0-10 5 5 0 0 1 0 10z"/><path d="M9 21h6"/></svg></div>
+        <h3>IA integrada</h3>
+        <p>Automação de atendimento e qualificação de leads em tempo real.</p>
+      </div>
+      <div class="receive-card reveal">
+        <div class="receive-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/></svg></div>
+        <h3>Leads qualificados</h3>
+        <p>Clientes reais direto no seu WhatsApp &mdash; sem perder tempo com curiosos.</p>
+      </div>
+      <div class="receive-card reveal">
+        <div class="receive-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>
+        <h3>Proteção de comissão</h3>
+        <p>Sistema com ID exclusivo de lead &mdash; carimbo de origem por 12 meses.</p>
+      </div>
+      <div class="receive-card reveal">
+        <div class="receive-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/><path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"/><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/></svg></div>
+        <h3>Geração de demanda</h3>
+        <p>Não é portal. É máquina de clientes &mdash; movida por IA e mídia.</p>
+      </div>
+      <div class="receive-card reveal">
+        <div class="receive-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></div>
+        <h3>Exclusividade territorial</h3>
+        <p>Apenas 5 parceiros por região. Sua presença é amplificada, não diluída.</p>
+      </div>
+      <div class="receive-card reveal">
+        <div class="receive-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div>
+        <h3>Posicionamento de autoridade</h3>
+        <p>Apareça como referência local na maior plataforma de alto padrão do DF.</p>
+      </div>
     </div>
   </div>
 </section>
@@ -381,18 +406,18 @@ footer a { color: var(--gold); text-decoration: none; }
   <div class="container">
     <div class="text-center">
       <span class="section-tag">Vagas em tempo real</span>
-      <h2 class="section-title">Vagas disponiveis por regiao</h2>
+      <h2 class="section-title">Vagas disponíveis por região</h2>
       <p class="section-subtitle">Atualizado em tempo real. As vagas se esgotam. Garanta a sua agora.</p>
     </div>
     <div class="regioes-grid" id="regioes-grid">
-      <p style="grid-column: 1/-1; text-align:center; color:var(--gray);">Carregando regioes...</p>
+      <p style="grid-column: 1/-1; text-align:center; color:var(--gray);">Carregando regiões...</p>
     </div>
     <div class="summary-bar" id="summary-bar">
       <div class="summary-info">
-        <span class="count" id="summary-count">0 regioes selecionadas</span>
-        <span class="total" id="summary-total">R$ 0,00 / mes</span>
+        <span class="count" id="summary-count">0 regiões selecionadas</span>
+        <span class="total" id="summary-total">R$ 0,00 / mês</span>
       </div>
-      <button class="btn btn-primary btn-large" onclick="abrirCadastroMulti()">Garantir minhas vagas</button>
+      <button class="btn btn-primary btn-large" onclick="abrirCadastroMulti()">Quero garantir minhas vagas</button>
     </div>
   </div>
 </section>
@@ -402,23 +427,23 @@ footer a { color: var(--gold); text-decoration: none; }
     <div class="text-center">
       <span class="section-tag" style="background:rgba(201,169,110,0.2); color:var(--gold-light);">Oferta Fundadores</span>
       <h2 class="section-title" style="color:#fff;">Plano Fundadores</h2>
-      <p class="section-subtitle" style="color:rgba(255,255,255,0.65);">Condicao especial. Vitalicia. Apenas para os primeiros parceiros.</p>
+      <p class="section-subtitle" style="color:rgba(255,255,255,0.65);">Condição especial. Vitalícia. Apenas para os primeiros parceiros.</p>
     </div>
     <div class="plano-card reveal">
       <span class="plano-tag">FUNDADORES</span>
-      <div class="plano-preco">R$ 497<small>/mes</small></div>
-      <span class="plano-vitalicio">Preco vitalicio</span>
-      <p class="plano-warning">Este valor nunca mais sera oferecido apos essa fase</p>
+      <div class="plano-preco">R$ 497<small>/mês</small></div>
+      <span class="plano-vitalicio">Preço vitalício</span>
+      <p class="plano-warning">Este valor nunca mais será oferecido após esta fase</p>
       <ul class="plano-features">
-        <li>Inclusao ilimitada de imoveis</li>
+        <li>Inclusão ilimitada de imóveis</li>
         <li>Leads qualificados pela IA</li>
-        <li>Vaga reservada na sua regiao</li>
+        <li>Vaga reservada na sua região</li>
         <li>WhatsApp integrado</li>
         <li>Curadoria com IA opcional</li>
-        <li>Suporte prioritario</li>
+        <li>Suporte prioritário</li>
         <li>Sem fidelidade. Cancele quando quiser</li>
       </ul>
-      <a href="#vagas" class="btn btn-primary btn-large btn-pulse" style="width:100%;">Garantir minha vaga</a>
+      <a href="#vagas" class="btn btn-primary btn-large btn-pulse" style="width:100%;">Quero garantir minha vaga</a>
       <div class="future-pricing">
         <div class="future-pricing-title">Fases futuras</div>
         <div class="future-pricing-list">
@@ -434,16 +459,16 @@ footer a { color: var(--gold); text-decoration: none; }
 <section class="section" id="comissao">
   <div class="container">
     <div class="text-center">
-      <span class="section-tag">Modelo de comissao</span>
-      <h2 class="section-title">Quanto mais voce vende, menor a nossa comissao</h2>
-      <p class="section-subtitle">Voce nao paga comissao fixa. Trabalhamos juntos pelo melhor resultado.</p>
+      <span class="section-tag">Modelo de comissão</span>
+      <h2 class="section-title">Quanto mais você vende, menor a nossa comissão</h2>
+      <p class="section-subtitle">Você não paga comissão fixa. Trabalhamos juntos pelo melhor resultado.</p>
     </div>
     <div class="com-grid" style="grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); max-width: 960px;">
-      <div class="com-card reveal"><div class="com-percent">15%</div><h4>Alta performance</h4><p>Resposta rapida, funil atualizado, conversao alta. Voce mantem 85% da comissao.</p></div>
-      <div class="com-card reveal"><div class="com-percent">20%</div><h4>Intermediaria</h4><p>Boa aderencia operacional. Faixa padrao de acompanhamento.</p></div>
+      <div class="com-card reveal"><div class="com-percent">15%</div><h4>Alta performance</h4><p>Resposta rápida, funil atualizado, conversão alta. Você mantém 85% da comissão.</p></div>
+      <div class="com-card reveal"><div class="com-percent">20%</div><h4>Intermediária</h4><p>Boa aderência operacional. Faixa padrão de acompanhamento.</p></div>
       <div class="com-card reveal"><div class="com-percent">25%</div><h4>Em desenvolvimento</h4><p>Parceiros em ramp-up. Investimento maior em suporte e leads.</p></div>
     </div>
-    <p class="com-message reveal">Nosso interesse e <em>te ajudar a vender mais</em>. Quanto melhor voce performa, melhor para voce e para nos.</p>
+    <p class="com-message reveal">Nosso interesse é <em>te ajudar a vender mais</em>. Quanto melhor você performa, melhor para você e para nós.</p>
   </div>
 </section>
 
@@ -451,11 +476,11 @@ footer a { color: var(--gold); text-decoration: none; }
   <div class="container">
     <div class="risco-icon">0</div>
     <h2 class="section-title">Zero risco</h2>
-    <p class="risco-text">21 dias de experiencia completa. Sem compromisso. Sem fidelidade - nem agora, nem nunca.</p>
-    <p class="risco-text">Voce pode sair a qualquer momento.</p>
+    <p class="risco-text">21 dias de experiência completa. Sem compromisso. Sem fidelidade &mdash; nem agora, nem nunca.</p>
+    <p class="risco-text">Você pode sair a qualquer momento.</p>
     <div class="risco-bullets">
       <div class="risco-bullet">21 dias gratuitos completos</div>
-      <div class="risco-bullet">Sem taxa de adesao</div>
+      <div class="risco-bullet">Sem taxa de adesão</div>
       <div class="risco-bullet">Sem fidelidade</div>
       <div class="risco-bullet">Cancele quando quiser</div>
     </div>
@@ -467,12 +492,12 @@ footer a { color: var(--gold); text-decoration: none; }
     <div class="text-center">
       <span class="section-tag">Requisitos</span>
       <h2 class="section-title">Quem pode ser parceiro fundador</h2>
-      <p class="section-subtitle">Buscamos profissionais que ja atuam no alto padrao</p>
+      <p class="section-subtitle">Buscamos profissionais que já atuam no alto padrão</p>
     </div>
     <div class="req-list">
-      <div class="req-card reveal"><div class="req-num">REQ 01</div><div class="req-text">Minimo de 30 imoveis ativos</div></div>
-      <div class="req-card reveal"><div class="req-num">REQ 02</div><div class="req-text">Ticket acima de R$ 1,5 milhao</div></div>
-      <div class="req-card reveal"><div class="req-num">REQ 03</div><div class="req-text">Comissao minima de 4%</div></div>
+      <div class="req-card reveal"><div class="req-num">REQ 01</div><div class="req-text">Mínimo de 30 imóveis ativos</div></div>
+      <div class="req-card reveal"><div class="req-num">REQ 02</div><div class="req-text">Ticket acima de R$ 1,5 milhão</div></div>
+      <div class="req-card reveal"><div class="req-num">REQ 03</div><div class="req-text">Comissão mínima de 4%</div></div>
     </div>
   </div>
 </section>
@@ -484,47 +509,47 @@ footer a { color: var(--gold); text-decoration: none; }
       <h2 class="section-title">Perguntas frequentes</h2>
     </div>
     <div class="faq-list">
-      <div class="faq-item"><div class="faq-q">Como funciona a exclusividade por regiao?<span class="faq-toggle">+</span></div><div class="faq-a">Cada regiao tem no maximo 5 parceiros oficiais. Quando uma vaga e ocupada, ela so abre novamente se algum parceiro sair. Isso garante que sua presenca seja amplificada e nao diluida.</div></div>
-      <div class="faq-item"><div class="faq-q">O preco de R$ 497 e realmente vitalicio?<span class="faq-toggle">+</span></div><div class="faq-a">Sim. Para os parceiros fundadores (primeiros 5 por regiao), o valor de R$ 497/mes nunca aumenta enquanto a parceria estiver ativa. Apos essa fase, novos parceiros pagarao R$ 997, depois R$ 1.497 e R$ 2.000+.</div></div>
-      <div class="faq-item"><div class="faq-q">Como sao os 21 dias gratuitos?<span class="faq-toggle">+</span></div><div class="faq-a">Voce tem acesso total a plataforma sem nenhuma cobranca. No 22o dia a primeira mensalidade e cobrada automaticamente. Voce pode cancelar a qualquer momento antes ou depois.</div></div>
-      <div class="faq-item"><div class="faq-q">Quais imoveis posso trabalhar?<span class="faq-toggle">+</span></div><div class="faq-a">Apenas imoveis de alto padrao acima de R$ 1,5 milhao na nossa base. Voce pode importar imoveis dos seus sites, cadastrar manualmente ou usar nossa Curadoria com IA.</div></div>
-      <div class="faq-item"><div class="faq-q">Como funciona a comissao?<span class="faq-toggle">+</span></div><div class="faq-a">15% para parceiros de alta performance e ate 25% para parceiros em ramp-up. Quanto mais voce vende, menor nossa porcentagem - nosso interesse e que voce venda muito.</div></div>
-      <div class="faq-item"><div class="faq-q">Existe taxa de adesao ou setup?<span class="faq-toggle">+</span></div><div class="faq-a">Nao. Apenas a mensalidade. Sem taxa de adesao, sem fidelidade. Voce paga apenas enquanto esta ativo.</div></div>
-      <div class="faq-item"><div class="faq-q">Posso participar de mais de uma regiao?<span class="faq-toggle">+</span></div><div class="faq-a">Sim. Voce seleciona quantas regioes quiser e o valor e calculado: R$ 497 por regiao. Exemplo: 2 regioes = R$ 994/mes, 3 regioes = R$ 1.491/mes.</div></div>
-      <div class="faq-item"><div class="faq-q">Como funciona o carimbo de origem do lead?<span class="faq-toggle">+</span></div><div class="faq-a">Todo lead gerado pela plataforma recebe ID unico e ficaregistrado por 12 meses. Vendas concretizadas durante esse periodo geram a comissao da Sao Casa Top conforme regua de performance, mesmo se a venda for fechada fora da plataforma.</div></div>
-      <div class="faq-item"><div class="faq-q">Por que Lago Sul esta encerrado?<span class="faq-toggle">+</span></div><div class="faq-a">As 5 vagas de Lago Sul ja foram preenchidas nesta fase do programa Fundadores. A regiao podera reabrir caso algum parceiro saia ou em fases futuras. Considere outras regioes premium como Lago Norte, Jardim Botanico ou Park Sul.</div></div>
+      <div class="faq-item"><div class="faq-q">Como funciona a exclusividade por região?<span class="faq-toggle">+</span></div><div class="faq-a">Cada região tem no máximo 5 parceiros oficiais. Quando uma vaga é ocupada, ela só abre novamente se algum parceiro sair. Isso garante que sua presença seja amplificada e não diluída.</div></div>
+      <div class="faq-item"><div class="faq-q">O preço de R$ 497 é realmente vitalício?<span class="faq-toggle">+</span></div><div class="faq-a">Sim. Para os parceiros Fundadores (primeiros 5 por região), o valor de R$ 497/mês nunca aumenta enquanto a parceria estiver ativa. Após esta fase, novos parceiros pagarão R$ 997, depois R$ 1.497 e R$ 2.000+.</div></div>
+      <div class="faq-item"><div class="faq-q">Como são os 21 dias gratuitos?<span class="faq-toggle">+</span></div><div class="faq-a">Você tem acesso total à plataforma sem nenhuma cobrança. No 22º dia a primeira mensalidade é cobrada automaticamente. Você pode cancelar a qualquer momento antes ou depois.</div></div>
+      <div class="faq-item"><div class="faq-q">Quais imóveis posso trabalhar?<span class="faq-toggle">+</span></div><div class="faq-a">Apenas imóveis de alto padrão acima de R$ 1,5 milhão na nossa base. Você pode importar imóveis dos seus sites, cadastrar manualmente ou usar nossa Curadoria com IA.</div></div>
+      <div class="faq-item"><div class="faq-q">Como funciona a comissão?<span class="faq-toggle">+</span></div><div class="faq-a">15% para parceiros de alta performance, 20% para intermediária e 25% para parceiros em ramp-up. Quanto mais você vende, menor nossa porcentagem &mdash; nosso interesse é que você venda muito.</div></div>
+      <div class="faq-item"><div class="faq-q">Existe taxa de adesão ou setup?<span class="faq-toggle">+</span></div><div class="faq-a">Não. Apenas a mensalidade. Sem taxa de adesão, sem fidelidade. Você paga apenas enquanto está ativo.</div></div>
+      <div class="faq-item"><div class="faq-q">Posso participar de mais de uma região?<span class="faq-toggle">+</span></div><div class="faq-a">Sim. Você seleciona quantas regiões quiser e o valor é calculado: R$ 497 por região. Exemplo: 2 regiões = R$ 994/mês, 3 regiões = R$ 1.491/mês.</div></div>
+      <div class="faq-item"><div class="faq-q">Como funciona o carimbo de origem do lead?<span class="faq-toggle">+</span></div><div class="faq-a">Todo lead gerado pela plataforma recebe ID único e fica registrado por 12 meses. Vendas concretizadas nesse período geram a comissão do Só Casa Top conforme régua de performance, mesmo que a venda seja fechada fora da plataforma.</div></div>
+      <div class="faq-item"><div class="faq-q">Por que Lago Sul está encerrado?<span class="faq-toggle">+</span></div><div class="faq-a">As 5 vagas de Lago Sul já foram preenchidas nesta fase do programa Fundadores. A região poderá reabrir caso algum parceiro saia ou em fases futuras. Considere outras regiões premium como Lago Norte, Jardim Botânico ou Park Sul.</div></div>
     </div>
   </div>
 </section>
 
 <section id="final-cta">
   <div class="container">
-    <h2>Garanta sua vaga antes que sua regiao seja fechada</h2>
-    <p>Apos o preenchimento das 5 vagas, sua regiao fica indisponivel. Quando alguem sair, sera priorizado quem entrou primeiro na lista de espera.</p>
+    <h2>Garanta sua vaga antes que sua região seja fechada</h2>
+    <p>Após o preenchimento das 5 vagas, sua região fica indisponível. Quando alguém sair, será priorizado quem entrou primeiro na lista de espera.</p>
     <a href="#vagas" class="btn btn-large btn-pulse">Quero agora</a>
   </div>
 </section>
 
 <footer>
   <div class="container">
-    So Casa Top - Imoveis de Alto Padrao em Brasilia<br>
+    Só Casa Top &middot; Imóveis de Alto Padrão em Brasília<br>
     <a href="https://instagram.com/socasatop_bsb" target="_blank">@socasatop_bsb</a>
   </div>
 </footer>
 
 <div class="modal-overlay" id="modal-overlay">
   <div class="modal">
-    <button class="modal-close" onclick="closeModal()">x</button>
+    <button class="modal-close" onclick="closeModal()">&times;</button>
     <h2 id="modal-title">Garantir vaga</h2>
     <p class="modal-subtitle" id="modal-subtitle"></p>
     <form id="form-cadastro" onsubmit="enviarCadastro(event)">
       <input type="hidden" name="regiao_id" id="form-regiao-id">
       <div class="form-group"><label>Nome completo *</label><input type="text" name="nome" required></div>
-      <div class="form-group"><label>WhatsApp (com DDD) *</label><input type="tel" name="whatsapp" placeholder="61 99999-9999" required></div>
+      <div class="form-group"><label>WhatsApp (com DDD) *</label><input type="tel" name="whatsapp" placeholder="(61) 99999-9999" required></div>
       <div class="form-group"><label>Email *</label><input type="email" name="email" required></div>
       <div class="form-group"><label>CPF ou CNPJ *</label><input type="text" name="cpf_cnpj" required></div>
       <div class="form-group"><label>CRECI (opcional)</label><input type="text" name="creci"></div>
-      <button type="submit" class="btn btn-primary btn-large" style="width:100%; margin-top: 8px;" id="form-submit">Garantir vaga</button>
+      <button type="submit" class="btn btn-primary btn-large" style="width:100%; margin-top: 8px;" id="form-submit">Quero garantir minha vaga</button>
       <div class="form-msg" id="form-msg"></div>
     </form>
   </div>
@@ -551,7 +576,7 @@ async function loadRegioes() {
     regioes = d.data || [];
     renderRegioes();
   } catch (e) {
-    document.getElementById('regioes-grid').innerHTML = '<p style="text-align:center;color:#dc2626;">Erro ao carregar regioes.</p>';
+    document.getElementById('regioes-grid').innerHTML = '<p style="text-align:center;color:#dc2626;">Erro ao carregar regiões.</p>';
   }
 }
 
@@ -579,8 +604,8 @@ function renderRegioes() {
     let statusText;
     if (encerrado) statusText = 'Encerrado nesta fase';
     else if (r.esgotado) statusText = 'Vagas esgotadas';
-    else if (r.vagas_disponiveis === 1) statusText = 'Ultima vaga!';
-    else statusText = r.vagas_disponiveis + ' vagas disponiveis';
+    else if (r.vagas_disponiveis === 1) statusText = 'Última vaga!';
+    else statusText = r.vagas_disponiveis + ' vagas disponíveis';
 
     const counter = encerrado ? '0/0' : (r.vagas_ocupadas + '/' + r.vagas_total);
 
@@ -596,8 +621,8 @@ function renderRegioes() {
 }
 
 function toggleRegiao(regiaoId, encerrado, esgotado) {
-  if (encerrado) { alert('Lago Sul esta encerrado nesta fase do programa.'); return; }
-  if (esgotado) { alert('Esta regiao esta esgotada. Aguarde a abertura de uma vaga.'); return; }
+  if (encerrado) { alert('Lago Sul está encerrado nesta fase do programa.'); return; }
+  if (esgotado) { alert('Esta região está esgotada. Aguarde a abertura de uma vaga.'); return; }
   if (selecionadas.has(regiaoId)) selecionadas.delete(regiaoId);
   else selecionadas.add(regiaoId);
   renderRegioes();
@@ -609,15 +634,15 @@ function atualizarResumo() {
   if (count === 0) { bar.classList.remove('show'); return; }
   bar.classList.add('show');
   const total = count * PRECO_POR_REGIAO;
-  document.getElementById('summary-count').textContent = count + (count > 1 ? ' regioes selecionadas' : ' regiao selecionada');
-  document.getElementById('summary-total').textContent = 'R$ ' + total.toLocaleString('pt-BR') + ',00 / mes';
+  document.getElementById('summary-count').textContent = count + (count > 1 ? ' regiões selecionadas' : ' região selecionada');
+  document.getElementById('summary-total').textContent = 'R$ ' + total.toLocaleString('pt-BR') + ',00 / mês';
 }
 
 function abrirCadastroMulti() {
-  if (selecionadas.size === 0) { alert('Selecione pelo menos uma regiao.'); return; }
+  if (selecionadas.size === 0) { alert('Selecione pelo menos uma região.'); return; }
   const nomes = regioes.filter(r => selecionadas.has(r.id)).map(r => r.nome);
   document.getElementById('modal-title').textContent = 'Garantir ' + (nomes.length > 1 ? 'vagas' : 'vaga');
-  document.getElementById('modal-subtitle').innerHTML = '<strong>Regioes:</strong> ' + nomes.join(', ') + '<br><strong>Total:</strong> R$ ' + (nomes.length * PRECO_POR_REGIAO).toLocaleString('pt-BR') + ',00/mes (21 dias gratis)';
+  document.getElementById('modal-subtitle').innerHTML = '<strong>Regiões:</strong> ' + nomes.join(', ') + '<br><strong>Total:</strong> R$ ' + (nomes.length * PRECO_POR_REGIAO).toLocaleString('pt-BR') + ',00/mês (21 dias grátis)';
   document.getElementById('form-regiao-id').value = Array.from(selecionadas).join(',');
   document.getElementById('modal-overlay').classList.add('open');
 }
@@ -659,12 +684,12 @@ async function enviarCadastro(e) {
       await loadRegioes();
       return;
     }
-    msgEl.textContent = 'Vaga(s) reservada(s)! Voce sera contatado em instantes para finalizar contrato e pagamento.';
+    msgEl.textContent = 'Vaga(s) reservada(s)! Você será contatado em instantes para finalizar contrato e pagamento.';
     msgEl.className = 'form-msg success';
     submitBtn.style.display = 'none';
     selecionadas.clear();
     await loadRegioes();
-    setTimeout(() => { closeModal(); submitBtn.style.display = 'block'; submitBtn.disabled = false; submitBtn.textContent = 'Garantir vaga'; form.reset(); }, 4000);
+    setTimeout(() => { closeModal(); submitBtn.style.display = 'block'; submitBtn.disabled = false; submitBtn.textContent = 'Quero garantir minha vaga'; form.reset(); }, 4000);
   } catch (e) {
     msgEl.textContent = 'Erro de rede. Tente novamente.';
     msgEl.className = 'form-msg error';

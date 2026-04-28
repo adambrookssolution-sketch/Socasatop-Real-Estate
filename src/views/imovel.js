@@ -15,23 +15,44 @@ function renderImovel(imovel, corretor) {
   const videos = allMedia.filter(m => m.endsWith('.mp4') || m.endsWith('.webm') || m.endsWith('.mov'));
   const photos = allMedia.filter(m => !videos.includes(m));
 
-  // Select OG image: prefer small files for WhatsApp preview
-  let ogImage = photos[0] || '';
+  // Select OG image optimized for WhatsApp: prefer JPG under 1MB, then poster, then any small file
+  let ogImage = '';
   if (photos.length > 0) {
     const fs = require('fs');
+    const localSize = (url) => {
+      try {
+        const lp = url.includes('/wp-content/uploads/')
+          ? '/root/socasatop/wp-images' + url.split('socasatop.com.br')[1]
+          : '/root/socasatop' + url.split('socasatop.com.br')[1];
+        if (fs.existsSync(lp)) return fs.statSync(lp).size;
+      } catch(e) {}
+      return null;
+    };
+
     const posterUrl = allMedia.find(u => /\.poster\.jpg$/i.test(u));
     if (posterUrl) {
-      ogImage = posterUrl;
-    } else {
-      for (const url of photos) {
-        try {
-          const lp = url.includes('/wp-content/uploads/')
-            ? '/root/socasatop/wp-images' + url.split('socasatop.com.br')[1]
-            : '/root/socasatop' + url.split('socasatop.com.br')[1];
-          if (fs.existsSync(lp) && fs.statSync(lp).size < 2000000) { ogImage = url; break; }
-        } catch(e) {}
-      }
+      const sz = localSize(posterUrl);
+      if (sz != null && sz < 5000000) ogImage = posterUrl;
     }
+
+    if (!ogImage) {
+      const jpgs = photos.filter(u => /\.(jpg|jpeg)$/i.test(u));
+      const pngs = photos.filter(u => /\.png$/i.test(u));
+      const jpgSizes = jpgs.map(u => ({ url: u, size: localSize(u) })).filter(x => x.size != null && x.size < 5000000);
+      const pngSizes = pngs.map(u => ({ url: u, size: localSize(u) })).filter(x => x.size != null && x.size < 5000000);
+      jpgSizes.sort((a,b) => a.size - b.size);
+      pngSizes.sort((a,b) => a.size - b.size);
+      if (jpgSizes.length > 0) ogImage = jpgSizes[0].url;
+      else if (pngSizes.length > 0) ogImage = pngSizes[0].url;
+    }
+
+    if (!ogImage) {
+      const sized = photos.map(u => ({ url: u, size: localSize(u) })).filter(x => x.size != null);
+      sized.sort((a,b) => a.size - b.size);
+      if (sized.length > 0) ogImage = sized[0].url;
+    }
+
+    if (!ogImage) ogImage = photos[0];
   }
 
   let photoGallery = '';
