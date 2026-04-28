@@ -22,18 +22,22 @@ function regiaoBloqueada(neighborhood) {
 
 async function listar(req, res) {
   const { offer_type, property_type, location, bedrooms, min_price, max_price, page = 1, limit = 20 } = req.query;
-  const offset = (page - 1) * limit;
+  const offset = (page - 1) * parseInt(limit);
 
   let query = supabase
     .from('imoveis')
-    .select('*', { count: 'exact' })
+    .select('*', { count: 'estimated' })
     .eq('ativo', true)
-    .range(offset, offset + limit - 1)
+    .range(offset, offset + parseInt(limit) - 1)
     .order('amount', { ascending: true });
 
   if (await hasVisibilityColumn()) {
     query = query.or('visibility.is.null,visibility.eq.explicito');
     query = query.or('status.is.null,status.eq.publicado,status.eq.vinculado');
+  }
+
+  for (const palavra of REGIOES_BLOQUEADAS) {
+    query = query.not('neighborhood', 'ilike', `%${palavra}%`);
   }
 
   if (offer_type) {
@@ -50,9 +54,7 @@ async function listar(req, res) {
   const { data, error, count } = await query;
   if (error) return res.status(500).json({ error: error.message });
 
-  const filtered = (data || []).filter(im => !regiaoBloqueada(im.neighborhood));
-
-  res.json({ total: count, page: parseInt(page), data: filtered });
+  res.json({ total: count, page: parseInt(page), data: data || [] });
 }
 
 async function detalhe(req, res) {

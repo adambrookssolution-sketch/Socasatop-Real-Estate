@@ -150,12 +150,20 @@ nav .container { display: flex; align-items: center; justify-content: space-betw
 .regiao-card.disponivel:hover { border-color: var(--gold); transform: translateY(-3px); box-shadow: 0 16px 40px -12px rgba(201,169,110,0.3); }
 .regiao-card.esgotado { opacity: 0.55; cursor: not-allowed; background: #f3f4f6; }
 .regiao-card.esgotado::after { content: 'ESGOTADO'; position: absolute; top: 12px; right: 12px; background: var(--danger); color: #fff; font-size: 10px; font-weight: 700; padding: 3px 8px; border-radius: 4px; letter-spacing: 1px; }
-.regiao-card.encerrado { opacity: 0.5; cursor: not-allowed; background: #1a1a2e; color: #fff; }
+.regiao-card.encerrado { opacity: 1; cursor: not-allowed; background: linear-gradient(135deg, #1a1a2e, #0f0e1a); color: #fff; border-color: var(--gold); }
 .regiao-card.encerrado .regiao-nome { color: #fff; }
+.regiao-card.encerrado .regiao-status { color: var(--gold); }
 .regiao-card.encerrado::after { content: 'ENCERRADO'; position: absolute; top: 12px; right: 12px; background: #0a0a14; color: var(--gold); font-size: 10px; font-weight: 700; padding: 3px 8px; border-radius: 4px; letter-spacing: 1px; border: 1px solid var(--gold); }
 .regiao-card.selected { border-color: var(--gold); background: #fff; box-shadow: 0 16px 40px -12px rgba(201,169,110,0.4); transform: translateY(-3px); }
 .regiao-card .check { position: absolute; top: 12px; right: 12px; width: 26px; height: 26px; border-radius: 50%; background: var(--gold); color: #fff; display: none; align-items: center; justify-content: center; font-size: 16px; font-weight: 700; }
 .regiao-card.selected .check { display: flex; }
+.regiao-counter { font-size: 13px; color: var(--gray); margin-bottom: 4px; font-weight: 500; }
+.regiao-counter strong { color: var(--gold); font-weight: 700; }
+.regioes-toggle-wrapper { text-align: center; margin-top: 24px; }
+.btn-toggle-regioes { background: transparent; border: 1px solid var(--border); color: var(--dark); padding: 12px 28px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s; display: inline-flex; align-items: center; gap: 8px; font-family: inherit; }
+.btn-toggle-regioes:hover { border-color: var(--gold); color: var(--gold); }
+.btn-toggle-regioes svg { transition: transform 0.3s; }
+.btn-toggle-regioes.expanded svg { transform: rotate(180deg); }
 
 .summary-bar { position: sticky; bottom: 20px; margin-top: 32px; padding: 20px 24px; background: var(--dark); color: #fff; border-radius: 16px; display: none; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; box-shadow: 0 20px 50px -10px rgba(0,0,0,0.4); z-index: 50; }
 .summary-bar.show { display: flex; }
@@ -412,6 +420,12 @@ footer a { color: var(--gold); text-decoration: none; }
     <div class="regioes-grid" id="regioes-grid">
       <p style="grid-column: 1/-1; text-align:center; color:var(--gray);">Carregando regiões...</p>
     </div>
+    <div class="regioes-toggle-wrapper" id="regioes-toggle-wrapper" style="display:none;">
+      <button class="btn-toggle-regioes" id="btn-toggle-regioes" onclick="toggleRegioesView()">
+        <span id="btn-toggle-text">Ver todas as regiões</span>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+      </button>
+    </div>
     <div class="summary-bar" id="summary-bar">
       <div class="summary-info">
         <span class="count" id="summary-count">0 regiões selecionadas</span>
@@ -582,11 +596,21 @@ async function loadRegioes() {
 
 const PRECO_POR_REGIAO = 497;
 let selecionadas = new Set();
+let regioesExpandidas = false;
 
 function isEncerrado(r) { return (r.vagas_total || 0) === 0; }
 
+function regioesParaExibir() {
+  if (regioesExpandidas) return regioes;
+  const encerradas = regioes.filter(isEncerrado);
+  const restantes = regioes.filter(r => !isEncerrado(r))
+    .sort((a, b) => (b.vagas_ocupadas || 0) - (a.vagas_ocupadas || 0));
+  return [...encerradas, ...restantes.slice(0, 3)];
+}
+
 function renderRegioes() {
-  const html = regioes.map(r => {
+  const exibir = regioesParaExibir();
+  const html = exibir.map(r => {
     const encerrado = isEncerrado(r);
     const dotsOcupadas = Array(r.vagas_ocupadas).fill('<span class="vaga-dot ocupada"></span>').join('');
     const dotsLivres = Array(Math.max(0, r.vagas_total - r.vagas_ocupadas)).fill('<span class="vaga-dot livre"></span>').join('');
@@ -596,28 +620,62 @@ function renderRegioes() {
     else klass = 'disponivel';
     if (selecionadas.has(r.id)) klass += ' selected';
 
-    let statusClass = 'disponivel';
-    if (encerrado) statusClass = 'esgotado';
-    else if (r.esgotado) statusClass = 'esgotado';
-    else if (r.vagas_disponiveis === 1) statusClass = 'last';
-
     let statusText;
-    if (encerrado) statusText = 'Encerrado nesta fase';
-    else if (r.esgotado) statusText = 'Vagas esgotadas';
-    else if (r.vagas_disponiveis === 1) statusText = 'Última vaga!';
-    else statusText = r.vagas_disponiveis + ' vagas disponíveis';
+    let statusClass = 'disponivel';
+    if (encerrado) {
+      statusText = 'Vagas esgotadas';
+      statusClass = 'esgotado';
+    } else if (r.esgotado) {
+      statusText = 'Vagas esgotadas';
+      statusClass = 'esgotado';
+    } else if (r.vagas_disponiveis === 1) {
+      statusText = 'Última vaga!';
+      statusClass = 'last';
+    } else {
+      statusText = r.vagas_disponiveis + ' vagas disponíveis';
+    }
 
-    const counter = encerrado ? '0/0' : (r.vagas_ocupadas + '/' + r.vagas_total);
+    let counter;
+    if (encerrado) {
+      counter = '<strong>5</strong> de 5 vagas preenchidas';
+    } else {
+      counter = '<strong>' + r.vagas_ocupadas + '</strong> de ' + r.vagas_total + ' vagas preenchidas';
+    }
 
     return '<div class="regiao-card ' + klass + '" data-id="' + r.id + '" onclick="toggleRegiao(' + r.id + ', ' + encerrado + ', ' + r.esgotado + ')">' +
       '<div class="regiao-nome">' + r.nome + '</div>' +
-      (encerrado ? '' : '<div class="regiao-vagas">' + dotsOcupadas + dotsLivres + '</div>') +
-      '<div class="regiao-status ' + statusClass + '">' + counter + ' - ' + statusText + '</div>' +
+      '<div class="regiao-counter">' + counter + '</div>' +
+      (encerrado ? '<div class="regiao-vagas">' + Array(5).fill('<span class="vaga-dot ocupada"></span>').join('') + '</div>' : '<div class="regiao-vagas">' + dotsOcupadas + dotsLivres + '</div>') +
+      '<div class="regiao-status ' + statusClass + '">' + statusText + '</div>' +
       '<div class="check">v</div>' +
       '</div>';
   }).join('');
   document.getElementById('regioes-grid').innerHTML = html;
+
+  const totalAtivas = regioes.filter(r => !isEncerrado(r)).length;
+  const ocultas = totalAtivas - 3;
+  const wrapper = document.getElementById('regioes-toggle-wrapper');
+  const txt = document.getElementById('btn-toggle-text');
+  const btn = document.getElementById('btn-toggle-regioes');
+  if (ocultas > 0) {
+    wrapper.style.display = 'block';
+    if (regioesExpandidas) {
+      txt.textContent = 'Ver menos';
+      btn.classList.add('expanded');
+    } else {
+      txt.textContent = 'Ver mais ' + ocultas + ' regiões';
+      btn.classList.remove('expanded');
+    }
+  } else {
+    wrapper.style.display = 'none';
+  }
+
   atualizarResumo();
+}
+
+function toggleRegioesView() {
+  regioesExpandidas = !regioesExpandidas;
+  renderRegioes();
 }
 
 function toggleRegiao(regiaoId, encerrado, esgotado) {
