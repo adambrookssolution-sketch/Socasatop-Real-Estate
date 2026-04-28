@@ -1,5 +1,6 @@
 const supabase = require('../config/supabase');
 const scraper = require('../services/scraper');
+const duplicateDetector = require('../services/duplicate_detector');
 
 const MIN_PRICE = Number(process.env.MIN_PRICE || 1500000);
 
@@ -27,7 +28,9 @@ async function importFromUrl(url, importedByPhone) {
   let duplicates = 0;
   let errors = 0;
   let belowMin = 0;
+  let duplicatesByMatch = 0;
   const importedIds = [];
+  const duplicateMatches = [];
 
   for (const prop of result.properties) {
     try {
@@ -49,6 +52,29 @@ async function importFromUrl(url, importedByPhone) {
           continue;
         }
       }
+
+      const propForCheck = {
+        titulo: prop.titulo,
+        neighborhood: prop.neighborhood,
+        location: prop.location,
+        street: prop.street,
+        amount: prop.preco,
+        size: prop.size,
+        bedrooms: prop.bedrooms,
+      };
+      try {
+        const dupCheck = await duplicateDetector.checkBeforeInsert(propForCheck);
+        if (dupCheck.duplicate && dupCheck.score >= 0.75) {
+          duplicatesByMatch++;
+          duplicateMatches.push({
+            tentativa: prop.titulo || prop.source_url,
+            ja_existe: dupCheck.match.titulo + ' (ID ' + dupCheck.match.id + ')',
+            motivo: dupCheck.reason,
+            score: dupCheck.score,
+          });
+          continue;
+        }
+      } catch (e) { /* if detector fails, allow insert */ }
 
       const subDir = 'imp_' + Date.now();
       const savedImages = await scraper.saveImagesForProperty(prop, subDir);
@@ -95,6 +121,8 @@ async function importFromUrl(url, importedByPhone) {
     success: true,
     imported,
     duplicates,
+    duplicates_by_match: duplicatesByMatch,
+    duplicate_matches: duplicateMatches,
     errors,
     below_min: belowMin,
     min_price: MIN_PRICE,

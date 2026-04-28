@@ -269,7 +269,18 @@ async function handleImportar(from, userText) {
       let msg = 'Importacao concluida!\n';
       msg += 'Total encontrado: ' + (result.total || 0) + '\n';
       msg += 'Importados: ' + result.imported + '\n';
-      msg += 'Duplicados (ignorados): ' + result.duplicates + '\n';
+      msg += 'Duplicados (mesma URL): ' + result.duplicates + '\n';
+      if (result.duplicates_by_match && result.duplicates_by_match > 0) {
+        msg += 'Ja cadastrado por outro parceiro: ' + result.duplicates_by_match + '\n';
+        if (result.duplicate_matches && result.duplicate_matches.length > 0) {
+          msg += '\nDetalhes:\n';
+          for (const d of result.duplicate_matches.slice(0, 3)) {
+            msg += '- "' + (d.tentativa || '?').substring(0, 40) + '" ja existe como "' + d.ja_existe + '"\n';
+            msg += '  (' + d.motivo + ')\n';
+          }
+          msg += '\n';
+        }
+      }
       if (result.below_min && result.below_min > 0) {
         const minFmt = 'R$ ' + Number(result.min_price || 1500000).toLocaleString('pt-BR');
         msg += 'Abaixo do valor minimo (' + minFmt + '): ' + result.below_min + '\n';
@@ -500,7 +511,61 @@ async function tryHandleCommand(from, userText) {
   if (/^aprovar\s+job\s+\d+/i.test(t)) return await handleAprovarJob(from, t);
   if (/^rejeitar\s+job\s+\d+/i.test(t)) return await handleRejeitarJob(from, t);
 
+  if (lower === 'duplicatas' || lower === 'duplicados') return await handleDuplicatas(from);
+
   return false;
+}
+
+async function handleDuplicatas(from) {
+  if (!permissions.isADM(from)) { await send(from, 'Apenas ADM.'); return true; }
+  const detector = require('./duplicate_detector');
+  const supabase = require('../config/supabase');
+  await send(from, 'Procurando duplicatas... isso pode levar 1-2 minutos.');
+
+  const { data: imoveis } = await supabase
+    .from('imoveis')
+    .select('id, titulo, neighborhood, location, street, amount, size, bedrooms, corretor_id')
+    .eq('ativo', true)
+    .limit(500);
+
+  const grupos = new Map();
+  for (const im of imoveis || []) {
+    const key = detector.buildSearchKey(im);
+    if (!key) continue;
+    if (!grupos.has(key)) grupos.set(key, []);
+    grupos.get(key).push(im);
+  }
+
+  const dups = [];
+  for (const [key, lista] of grupos.entries()) {
+    if (lista.length < 2) continue;
+    const validos = lista.filter(im => {
+      const others = lista.filter(o => o.id !== im.id);
+      return others.some(o => {
+        if (im.bedrooms && o.bedrooms && im.bedrooms !== o.bedrooms) return false;
+        return true;
+      });
+    });
+    if (validos.length >= 2) dups.push({ key, items: validos });
+  }
+
+  if (dups.length === 0) {
+    await send(from, 'Nenhuma duplicata identificada na base ativa.');
+    return true;
+  }
+
+  let msg = 'Possiveis duplicatas (' + dups.length + ' grupos):\n';
+  for (const grupo of dups.slice(0, 10)) {
+    msg += '\n[' + grupo.key + ']\n';
+    for (const im of grupo.items.slice(0, 5)) {
+      const preco = im.amount ? 'R$ ' + Number(im.amount).toLocaleString('pt-BR') : 'consulta';
+      msg += '  ID ' + im.id + ': ' + (im.titulo || '?').substring(0, 50) + ' - ' + preco + '\n';
+    }
+  }
+  if (dups.length > 10) msg += '\n... e mais ' + (dups.length - 10) + ' grupos.';
+  msg += '\n\nUse "excluir [ID]" para remover duplicata.';
+  await send(from, msg);
+  return true;
 }
 
 async function handleCurar(from, text) {
