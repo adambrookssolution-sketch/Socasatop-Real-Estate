@@ -79,7 +79,11 @@ app.get('/imovel/:id', async (req, res) => {
     const { data, error } = await supabaseView.from('imoveis').select('*').eq('id', id).single();
     if (error || !data) return res.status(404).send('<h1>Imovel nao encontrado</h1>');
 
-    if (data.ativo === false || data.visibility === 'oculto' || (data.status && !['publicado', 'vinculado'].includes(data.status))) {
+    const REG_BLOQ = ['guara','guará','taguatinga','sobradinho','planaltina','samambaia','ceilandia','ceilândia','recanto das emas','gama','santa maria','riacho fundo'];
+    const nb = (data.neighborhood || '').toLowerCase().trim();
+    const isBloqueado = REG_BLOQ.some(b => nb === b || nb.startsWith(b + ' ') || nb.endsWith(' ' + b));
+
+    if (data.ativo === false || data.visibility === 'oculto' || (data.status && !['publicado', 'vinculado'].includes(data.status)) || isBloqueado) {
       imovelCache.delete(id);
       return res.status(404).send('<h1>Imovel nao disponivel</h1>');
     }

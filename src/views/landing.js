@@ -149,6 +149,18 @@ nav .container { display: flex; align-items: center; justify-content: space-betw
 .regiao-card.disponivel:hover { border-color: var(--gold); transform: translateY(-3px); box-shadow: 0 16px 40px -12px rgba(201,169,110,0.3); }
 .regiao-card.esgotado { opacity: 0.55; cursor: not-allowed; background: #f3f4f6; }
 .regiao-card.esgotado::after { content: 'ESGOTADO'; position: absolute; top: 12px; right: 12px; background: var(--danger); color: #fff; font-size: 10px; font-weight: 700; padding: 3px 8px; border-radius: 4px; letter-spacing: 1px; }
+.regiao-card.encerrado { opacity: 0.5; cursor: not-allowed; background: #1a1a2e; color: #fff; }
+.regiao-card.encerrado .regiao-nome { color: #fff; }
+.regiao-card.encerrado::after { content: 'ENCERRADO'; position: absolute; top: 12px; right: 12px; background: #0a0a14; color: var(--gold); font-size: 10px; font-weight: 700; padding: 3px 8px; border-radius: 4px; letter-spacing: 1px; border: 1px solid var(--gold); }
+.regiao-card.selected { border-color: var(--gold); background: #fff; box-shadow: 0 16px 40px -12px rgba(201,169,110,0.4); transform: translateY(-3px); }
+.regiao-card .check { position: absolute; top: 12px; right: 12px; width: 26px; height: 26px; border-radius: 50%; background: var(--gold); color: #fff; display: none; align-items: center; justify-content: center; font-size: 16px; font-weight: 700; }
+.regiao-card.selected .check { display: flex; }
+
+.summary-bar { position: sticky; bottom: 20px; margin-top: 32px; padding: 20px 24px; background: var(--dark); color: #fff; border-radius: 16px; display: none; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; box-shadow: 0 20px 50px -10px rgba(0,0,0,0.4); z-index: 50; }
+.summary-bar.show { display: flex; }
+.summary-info span { display: block; }
+.summary-info .count { font-size: 13px; color: rgba(255,255,255,0.6); }
+.summary-info .total { font-family: 'Playfair Display', serif; font-size: 28px; font-weight: 700; color: var(--gold); margin-top: 2px; }
 .regiao-nome { font-size: 17px; font-weight: 700; margin-bottom: 12px; }
 .regiao-vagas { display: flex; gap: 5px; align-items: center; margin-bottom: 10px; }
 .vaga-dot { width: 16px; height: 16px; border-radius: 50%; transition: transform 0.3s; }
@@ -375,6 +387,13 @@ footer a { color: var(--gold); text-decoration: none; }
     <div class="regioes-grid" id="regioes-grid">
       <p style="grid-column: 1/-1; text-align:center; color:var(--gray);">Carregando regioes...</p>
     </div>
+    <div class="summary-bar" id="summary-bar">
+      <div class="summary-info">
+        <span class="count" id="summary-count">0 regioes selecionadas</span>
+        <span class="total" id="summary-total">R$ 0,00 / mes</span>
+      </div>
+      <button class="btn btn-primary btn-large" onclick="abrirCadastroMulti()">Garantir minhas vagas</button>
+    </div>
   </div>
 </section>
 
@@ -419,9 +438,10 @@ footer a { color: var(--gold); text-decoration: none; }
       <h2 class="section-title">Quanto mais voce vende, menor a nossa comissao</h2>
       <p class="section-subtitle">Voce nao paga comissao fixa. Trabalhamos juntos pelo melhor resultado.</p>
     </div>
-    <div class="com-grid">
-      <div class="com-card reveal"><div class="com-percent">15%</div><h4>Alta performance</h4><p>Para parceiros que vendem com regularidade. Voce mantem mais por venda.</p></div>
-      <div class="com-card reveal"><div class="com-percent">25%</div><h4>Em construcao</h4><p>Para parceiros em ramp-up. A comissao maior nos cobre o investimento em leads.</p></div>
+    <div class="com-grid" style="grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); max-width: 960px;">
+      <div class="com-card reveal"><div class="com-percent">15%</div><h4>Alta performance</h4><p>Resposta rapida, funil atualizado, conversao alta. Voce mantem 85% da comissao.</p></div>
+      <div class="com-card reveal"><div class="com-percent">20%</div><h4>Intermediaria</h4><p>Boa aderencia operacional. Faixa padrao de acompanhamento.</p></div>
+      <div class="com-card reveal"><div class="com-percent">25%</div><h4>Em desenvolvimento</h4><p>Parceiros em ramp-up. Investimento maior em suporte e leads.</p></div>
     </div>
     <p class="com-message reveal">Nosso interesse e <em>te ajudar a vender mais</em>. Quanto melhor voce performa, melhor para voce e para nos.</p>
   </div>
@@ -470,6 +490,9 @@ footer a { color: var(--gold); text-decoration: none; }
       <div class="faq-item"><div class="faq-q">Quais imoveis posso trabalhar?<span class="faq-toggle">+</span></div><div class="faq-a">Apenas imoveis de alto padrao acima de R$ 1,5 milhao na nossa base. Voce pode importar imoveis dos seus sites, cadastrar manualmente ou usar nossa Curadoria com IA.</div></div>
       <div class="faq-item"><div class="faq-q">Como funciona a comissao?<span class="faq-toggle">+</span></div><div class="faq-a">15% para parceiros de alta performance e ate 25% para parceiros em ramp-up. Quanto mais voce vende, menor nossa porcentagem - nosso interesse e que voce venda muito.</div></div>
       <div class="faq-item"><div class="faq-q">Existe taxa de adesao ou setup?<span class="faq-toggle">+</span></div><div class="faq-a">Nao. Apenas a mensalidade. Sem taxa de adesao, sem fidelidade. Voce paga apenas enquanto esta ativo.</div></div>
+      <div class="faq-item"><div class="faq-q">Posso participar de mais de uma regiao?<span class="faq-toggle">+</span></div><div class="faq-a">Sim. Voce seleciona quantas regioes quiser e o valor e calculado: R$ 497 por regiao. Exemplo: 2 regioes = R$ 994/mes, 3 regioes = R$ 1.491/mes.</div></div>
+      <div class="faq-item"><div class="faq-q">Como funciona o carimbo de origem do lead?<span class="faq-toggle">+</span></div><div class="faq-a">Todo lead gerado pela plataforma recebe ID unico e ficaregistrado por 12 meses. Vendas concretizadas durante esse periodo geram a comissao da Sao Casa Top conforme regua de performance, mesmo se a venda for fechada fora da plataforma.</div></div>
+      <div class="faq-item"><div class="faq-q">Por que Lago Sul esta encerrado?<span class="faq-toggle">+</span></div><div class="faq-a">As 5 vagas de Lago Sul ja foram preenchidas nesta fase do programa Fundadores. A regiao podera reabrir caso algum parceiro saia ou em fases futuras. Considere outras regioes premium como Lago Norte, Jardim Botanico ou Park Sul.</div></div>
     </div>
   </div>
 </section>
@@ -532,33 +555,75 @@ async function loadRegioes() {
   }
 }
 
+const PRECO_POR_REGIAO = 497;
+let selecionadas = new Set();
+
+function isEncerrado(r) { return (r.vagas_total || 0) === 0; }
+
 function renderRegioes() {
   const html = regioes.map(r => {
+    const encerrado = isEncerrado(r);
     const dotsOcupadas = Array(r.vagas_ocupadas).fill('<span class="vaga-dot ocupada"></span>').join('');
     const dotsLivres = Array(Math.max(0, r.vagas_total - r.vagas_ocupadas)).fill('<span class="vaga-dot livre"></span>').join('');
-    const klass = r.esgotado ? 'esgotado' : 'disponivel';
+    let klass;
+    if (encerrado) klass = 'encerrado';
+    else if (r.esgotado) klass = 'esgotado';
+    else klass = 'disponivel';
+    if (selecionadas.has(r.id)) klass += ' selected';
+
     let statusClass = 'disponivel';
-    if (r.esgotado) statusClass = 'esgotado';
+    if (encerrado) statusClass = 'esgotado';
+    else if (r.esgotado) statusClass = 'esgotado';
     else if (r.vagas_disponiveis === 1) statusClass = 'last';
+
     let statusText;
-    if (r.esgotado) statusText = 'Vagas esgotadas';
+    if (encerrado) statusText = 'Encerrado nesta fase';
+    else if (r.esgotado) statusText = 'Vagas esgotadas';
     else if (r.vagas_disponiveis === 1) statusText = 'Ultima vaga!';
     else statusText = r.vagas_disponiveis + ' vagas disponiveis';
-    return '<div class="regiao-card ' + klass + '" onclick="abrirCadastro(' + r.id + ', \\'' + r.nome.replace(/'/g, "\\\\'") + '\\', ' + r.esgotado + ')">' +
+
+    const counter = encerrado ? '0/0' : (r.vagas_ocupadas + '/' + r.vagas_total);
+
+    return '<div class="regiao-card ' + klass + '" data-id="' + r.id + '" onclick="toggleRegiao(' + r.id + ', ' + encerrado + ', ' + r.esgotado + ')">' +
       '<div class="regiao-nome">' + r.nome + '</div>' +
-      '<div class="regiao-vagas">' + dotsOcupadas + dotsLivres + '</div>' +
-      '<div class="regiao-status ' + statusClass + '">' + r.vagas_ocupadas + '/' + r.vagas_total + ' - ' + statusText + '</div>' +
+      (encerrado ? '' : '<div class="regiao-vagas">' + dotsOcupadas + dotsLivres + '</div>') +
+      '<div class="regiao-status ' + statusClass + '">' + counter + ' - ' + statusText + '</div>' +
+      '<div class="check">v</div>' +
       '</div>';
   }).join('');
   document.getElementById('regioes-grid').innerHTML = html;
+  atualizarResumo();
+}
+
+function toggleRegiao(regiaoId, encerrado, esgotado) {
+  if (encerrado) { alert('Lago Sul esta encerrado nesta fase do programa.'); return; }
+  if (esgotado) { alert('Esta regiao esta esgotada. Aguarde a abertura de uma vaga.'); return; }
+  if (selecionadas.has(regiaoId)) selecionadas.delete(regiaoId);
+  else selecionadas.add(regiaoId);
+  renderRegioes();
+}
+
+function atualizarResumo() {
+  const bar = document.getElementById('summary-bar');
+  const count = selecionadas.size;
+  if (count === 0) { bar.classList.remove('show'); return; }
+  bar.classList.add('show');
+  const total = count * PRECO_POR_REGIAO;
+  document.getElementById('summary-count').textContent = count + (count > 1 ? ' regioes selecionadas' : ' regiao selecionada');
+  document.getElementById('summary-total').textContent = 'R$ ' + total.toLocaleString('pt-BR') + ',00 / mes';
+}
+
+function abrirCadastroMulti() {
+  if (selecionadas.size === 0) { alert('Selecione pelo menos uma regiao.'); return; }
+  const nomes = regioes.filter(r => selecionadas.has(r.id)).map(r => r.nome);
+  document.getElementById('modal-title').textContent = 'Garantir ' + (nomes.length > 1 ? 'vagas' : 'vaga');
+  document.getElementById('modal-subtitle').innerHTML = '<strong>Regioes:</strong> ' + nomes.join(', ') + '<br><strong>Total:</strong> R$ ' + (nomes.length * PRECO_POR_REGIAO).toLocaleString('pt-BR') + ',00/mes (21 dias gratis)';
+  document.getElementById('form-regiao-id').value = Array.from(selecionadas).join(',');
+  document.getElementById('modal-overlay').classList.add('open');
 }
 
 function abrirCadastro(regiaoId, nomeRegiao, esgotado) {
-  if (esgotado) { alert('Esta regiao esta esgotada. Aguarde a abertura de uma vaga.'); return; }
-  document.getElementById('modal-title').textContent = 'Garantir vaga em ' + nomeRegiao;
-  document.getElementById('modal-subtitle').textContent = 'Apos preencher voce sera direcionado para o contrato e pagamento (21 dias gratis).';
-  document.getElementById('form-regiao-id').value = regiaoId;
-  document.getElementById('modal-overlay').classList.add('open');
+  toggleRegiao(regiaoId, false, esgotado);
 }
 
 function closeModal() {
@@ -575,7 +640,13 @@ async function enviarCadastro(e) {
   submitBtn.textContent = 'Enviando...';
   msgEl.className = 'form-msg';
   const data = Object.fromEntries(new FormData(form));
-  data.regiao_id = parseInt(data.regiao_id);
+  const ridRaw = String(data.regiao_id || '');
+  if (ridRaw.includes(',')) {
+    data.regiao_ids = ridRaw.split(',').map(x => parseInt(x.trim())).filter(x => x);
+    delete data.regiao_id;
+  } else {
+    data.regiao_id = parseInt(ridRaw);
+  }
   data.source_landing = 'lp_fundadores';
   try {
     const r = await fetch('/api/parceiros', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
@@ -588,9 +659,10 @@ async function enviarCadastro(e) {
       await loadRegioes();
       return;
     }
-    msgEl.textContent = 'Vaga reservada! Voce sera contatado em instantes para finalizar contrato e pagamento.';
+    msgEl.textContent = 'Vaga(s) reservada(s)! Voce sera contatado em instantes para finalizar contrato e pagamento.';
     msgEl.className = 'form-msg success';
     submitBtn.style.display = 'none';
+    selecionadas.clear();
     await loadRegioes();
     setTimeout(() => { closeModal(); submitBtn.style.display = 'block'; submitBtn.disabled = false; submitBtn.textContent = 'Garantir vaga'; form.reset(); }, 4000);
   } catch (e) {

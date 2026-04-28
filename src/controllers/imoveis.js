@@ -12,6 +12,14 @@ async function hasVisibilityColumn() {
   return _visibilityColumnExists;
 }
 
+const REGIOES_BLOQUEADAS = ['guara', 'guará', 'taguatinga', 'sobradinho', 'planaltina', 'samambaia', 'ceilandia', 'ceilândia', 'recanto das emas', 'gama', 'santa maria', 'riacho fundo'];
+
+function regiaoBloqueada(neighborhood) {
+  if (!neighborhood) return false;
+  const n = neighborhood.toLowerCase().trim();
+  return REGIOES_BLOQUEADAS.some(b => n === b || n.startsWith(b + ' ') || n.endsWith(' ' + b));
+}
+
 async function listar(req, res) {
   const { offer_type, property_type, location, bedrooms, min_price, max_price, page = 1, limit = 20 } = req.query;
   const offset = (page - 1) * limit;
@@ -42,7 +50,9 @@ async function listar(req, res) {
   const { data, error, count } = await query;
   if (error) return res.status(500).json({ error: error.message });
 
-  res.json({ total: count, page: parseInt(page), data });
+  const filtered = (data || []).filter(im => !regiaoBloqueada(im.neighborhood));
+
+  res.json({ total: count, page: parseInt(page), data: filtered });
 }
 
 async function detalhe(req, res) {
@@ -54,6 +64,7 @@ async function detalhe(req, res) {
     .single();
 
   if (error) return res.status(404).json({ error: 'Imóvel não encontrado' });
+  if (regiaoBloqueada(data.neighborhood)) return res.status(404).json({ error: 'Imóvel não disponível' });
   res.json(data);
 }
 

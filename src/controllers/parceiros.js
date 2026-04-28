@@ -5,6 +5,10 @@ const clicksign = require('../services/clicksign');
 const PLAN_VALOR_CENTAVOS = parseInt(process.env.PARCEIRO_PLANO_CENTAVOS || '49700');
 const TRIAL_DIAS = parseInt(process.env.PARCEIRO_TRIAL_DIAS || '21');
 
+function calcularValorCentavos(numRegioes) {
+  return PLAN_VALOR_CENTAVOS * Math.max(1, numRegioes);
+}
+
 async function logEvento(parceiroId, tipo, payload) {
   try {
     await supabase.from('parceiros_eventos').insert({
@@ -48,21 +52,35 @@ async function atualizarContadorRegiao(regiaoId) {
 
 async function iniciarCadastro(req, res) {
   try {
-    const { nome, whatsapp, email, cpf_cnpj, creci, especialidade, regiao_id, regiao_slug, source_landing } = req.body;
+    const { nome, whatsapp, email, cpf_cnpj, creci, especialidade, regiao_id, regiao_slug, regiao_ids, regiao_slugs, source_landing } = req.body;
     if (!nome || !whatsapp || !email || !cpf_cnpj) {
       return res.status(400).json({ error: 'nome, whatsapp, email e cpf_cnpj obrigatorios' });
     }
-    if (!regiao_id && !regiao_slug) {
-      return res.status(400).json({ error: 'regiao_id ou regiao_slug obrigatorio' });
-    }
 
-    let regiao;
-    if (regiao_id) {
-      regiao = await reservarVaga({ regiaoId: regiao_id });
-    } else {
+    let regiaoIdList = [];
+    if (Array.isArray(regiao_ids) && regiao_ids.length > 0) {
+      regiaoIdList = regiao_ids.map(x => parseInt(x)).filter(x => x);
+    } else if (Array.isArray(regiao_slugs) && regiao_slugs.length > 0) {
+      const { data } = await supabase.from('regioes').select('id').in('slug', regiao_slugs);
+      regiaoIdList = (data || []).map(r => r.id);
+    } else if (regiao_id) {
+      regiaoIdList = [parseInt(regiao_id)];
+    } else if (regiao_slug) {
       const { data: r } = await supabase.from('regioes').select('id').eq('slug', regiao_slug).maybeSingle();
       if (!r) return res.status(404).json({ error: 'regiao nao encontrada' });
-      regiao = await reservarVaga({ regiaoId: r.id });
+      regiaoIdList = [r.id];
+    } else {
+      return res.status(400).json({ error: 'pelo menos uma regiao obrigatoria (regiao_id, regiao_slug, regiao_ids ou regiao_slugs)' });
+    }
+
+    if (regiaoIdList.length === 0) {
+      return res.status(400).json({ error: 'nenhuma regiao valida selecionada' });
+    }
+
+    const regioesValidadas = [];
+    for (const rid of regiaoIdList) {
+      const r = await reservarVaga({ regiaoId: rid });
+      regioesValidadas.push(r);
     }
 
     const cleanWhatsapp = (whatsapp || '').replace(/\D/g, '');
@@ -76,6 +94,7 @@ async function iniciarCadastro(req, res) {
       .maybeSingle();
     if (existing) return res.status(409).json({ error: 'Ja existe um cadastro ativo para este WhatsApp', parceiro_id: existing.id });
 
+    const regiaoPrincipalId = regioesValidadas[0].id;
     const { data: parceiro, error: pErr } = await supabase
       .from('parceiros')
       .insert({
@@ -85,7 +104,7 @@ async function iniciarCadastro(req, res) {
         cpf_cnpj: cleanCpf,
         creci: creci || null,
         especialidade: especialidade || null,
-        regiao_id: regiao.id,
+        regiao_id: regiaoPrincipalId,
         status: 'reservado',
         source_landing: source_landing || 'lp',
         ip_cadastro: req.ip || (req.headers && req.headers['x-forwarded-for']) || null,
@@ -95,12 +114,28 @@ async function iniciarCadastro(req, res) {
       .single();
     if (pErr) throw pErr;
 
-    await atualizarContadorRegiao(regiao.id);
-    await logEvento(parceiro.id, 'cadastro_iniciado', { regiao: regiao.nome });
+    try {
+      const linkRows = regioesValidadas.map(r => ({
+        parceiro_id: parceiro.id,
+        regiao_id: r.id,
+        status: 'reservado',
+      }));
+      await supabase.from('parceiros_regioes').insert(linkRows);
+    } catch (e) { /* tabela pode nao existir ainda; tudo bem */ }
+
+    for (const r of regioesValidadas) {
+      await atualizarContadorRegiao(r.id);
+    }
+    await logEvento(parceiro.id, 'cadastro_iniciado', {
+      regioes: regioesValidadas.map(r => r.nome),
+      valor_centavos: calcularValorCentavos(regioesValidadas.length),
+    });
 
     res.status(201).json({
       data: parceiro,
-      regiao: { id: regiao.id, nome: regiao.nome, slug: regiao.slug },
+      regioes: regioesValidadas.map(r => ({ id: r.id, nome: r.nome, slug: r.slug })),
+      valor_mensal_centavos: calcularValorCentavos(regioesValidadas.length),
+      valor_mensal_reais: calcularValorCentavos(regioesValidadas.length) / 100,
       proximos_passos: ['contrato', 'pagamento'],
     });
   } catch (e) {
