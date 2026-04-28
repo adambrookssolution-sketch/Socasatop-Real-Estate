@@ -6,12 +6,27 @@ process.on('unhandledRejection', (err) => { console.error('UNHANDLED:', err.mess
 
 const express = require('express');
 const cors = require('cors');
+const compression = require('compression');
 require('dotenv').config({ path: require('path').resolve(__dirname, '..', '.env') });
 
 const app = express();
 
+app.use(compression());
 app.use(cors());
 app.use(express.json({ limit: '10mb' }));
+
+app.use('/api/imoveis', (req, res, next) => {
+  if (req.method === 'GET') {
+    res.set('Cache-Control', 'public, max-age=60, s-maxage=120');
+  }
+  next();
+});
+app.use('/api/regioes', (req, res, next) => {
+  if (req.method === 'GET') {
+    res.set('Cache-Control', 'public, max-age=300, s-maxage=600');
+  }
+  next();
+});
 
 // Health check
 app.get('/', (req, res) => {

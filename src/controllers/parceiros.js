@@ -202,6 +202,102 @@ async function enviarContrato(req, res) {
   }
 }
 
+async function cadastrarCartao(req, res) {
+  try {
+    const parceiroId = parseInt(req.params.id);
+    const { card_token, holder_name, holder_tax_id } = req.body;
+    if (!card_token) return res.status(400).json({ error: 'card_token obrigatorio' });
+
+    const { data: p } = await supabase.from('parceiros').select('*').eq('id', parceiroId).maybeSingle();
+    if (!p) return res.status(404).json({ error: 'parceiro nao encontrado' });
+
+    const { count: nRegioes } = await supabase
+      .from('parceiros_regioes')
+      .select('*', { count: 'exact', head: true })
+      .eq('parceiro_id', parceiroId)
+      .in('status', ['reservado', 'ocupado']);
+    const numRegioes = Math.max(1, nRegioes || 1);
+    const valorCentavos = calcularValorCentavos(numRegioes);
+
+    if (!pagbank.isConfigured()) {
+      const fakeSubId = 'mock-sub-' + Date.now();
+      const trialEndsAt = new Date(Date.now() + TRIAL_DIAS * 24 * 60 * 60 * 1000).toISOString();
+      await supabase.from('parceiros').update({
+        pagbank_subscription_id: fakeSubId,
+        trial_ends_at: trialEndsAt,
+        subscription_started_at: new Date().toISOString(),
+        cartao_cadastrado_em: new Date().toISOString(),
+      }).eq('id', parceiroId);
+      await logEvento(parceiroId, 'cartao_mock_cadastrado', { subscription_id: fakeSubId, valor_centavos: valorCentavos, num_regioes: numRegioes });
+      return res.json({
+        subscription_id: fakeSubId,
+        trial_ends_at: trialEndsAt,
+        valor_mensal_centavos: valorCentavos,
+        proxima_cobranca_em: trialEndsAt,
+        mock: true,
+        message: 'Modo simulado. Cartao "registrado", trial 21 dias iniciado.',
+      });
+    }
+
+    let customerId = p.pagbank_customer_id;
+    if (!customerId) {
+      const customer = await pagbank.criarCustomer({
+        nome: p.nome, email: p.email, cpf_cnpj: p.cpf_cnpj, whatsapp: p.whatsapp,
+      });
+      customerId = customer.id;
+      await supabase.from('parceiros').update({ pagbank_customer_id: customerId }).eq('id', parceiroId);
+      await logEvento(parceiroId, 'customer_criado', { customer_id: customerId });
+    }
+
+    const plano = await pagbank.criarPlano({
+      nome: 'Parceiro Socasatop ' + numRegioes + (numRegioes === 1 ? ' regiao' : ' regioes'),
+      valorCentavos,
+      intervalo: 'MONTH',
+      descricao: 'Plano parceiro com ' + numRegioes + ' regiao(oes), trial ' + TRIAL_DIAS + ' dias',
+    });
+    await logEvento(parceiroId, 'plano_criado', { plan_id: plano.id, valor_centavos: valorCentavos });
+
+    const subscription = await pagbank.criarSubscription({
+      planId: plano.id,
+      customerId,
+      paymentMethod: [{
+        type: 'CREDIT_CARD',
+        card: {
+          encrypted: card_token,
+          security_code: undefined,
+          holder: holder_name || holder_tax_id ? {
+            name: holder_name || p.nome,
+            tax_id: (holder_tax_id || p.cpf_cnpj || '').replace(/\D/g, ''),
+          } : undefined,
+        },
+      }],
+    });
+
+    const trialEndsAt = new Date(Date.now() + TRIAL_DIAS * 24 * 60 * 60 * 1000).toISOString();
+    await supabase.from('parceiros').update({
+      pagbank_subscription_id: subscription.id,
+      pagbank_plan_id: plano.id,
+      trial_ends_at: trialEndsAt,
+      subscription_started_at: new Date().toISOString(),
+      cartao_cadastrado_em: new Date().toISOString(),
+    }).eq('id', parceiroId);
+    await logEvento(parceiroId, 'subscription_criada', {
+      subscription_id: subscription.id, plan_id: plano.id, valor_centavos: valorCentavos, trial_dias: TRIAL_DIAS,
+    });
+
+    res.json({
+      subscription_id: subscription.id,
+      trial_ends_at: trialEndsAt,
+      valor_mensal_centavos: valorCentavos,
+      valor_mensal_reais: valorCentavos / 100,
+      proxima_cobranca_em: trialEndsAt,
+      message: 'Cartao registrado. Trial de ' + TRIAL_DIAS + ' dias iniciado. Primeira cobranca apos esse periodo.',
+    });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+}
+
 async function iniciarPagamento(req, res) {
   try {
     const parceiroId = parseInt(req.params.id);
@@ -299,6 +395,7 @@ async function cancelar(req, res) {
 
 module.exports = {
   iniciarCadastro,
+  cadastrarCartao,
   enviarContrato,
   iniciarPagamento,
   listar,

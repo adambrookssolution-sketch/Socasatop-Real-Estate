@@ -36,27 +36,33 @@ function render() {
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
 :root {
-  --gold: #c9a96e;
-  --gold-dark: #a68546;
+  --gold: #b8924a;
+  --gold-dark: #97762f;
   --gold-light: #e8d4a8;
-  --dark: #0a0a14;
-  --dark-2: #15151f;
-  --light: #faf8f5;
+  --dark: #2a2a3a;
+  --dark-2: #3a3a4a;
+  --light: #fbfaf7;
+  --cream: #f5f0e6;
   --gray: #6b7280;
   --gray-light: #9ca3af;
-  --border: #e8e4de;
+  --border: #ece8e0;
   --success: #10b981;
   --danger: #dc2626;
-  --warning: #f59e0b;
+  --warning: #d97706;
 }
 html, body { max-width: 100vw; overflow-x: hidden; font-family: 'Inter', sans-serif; color: #1a1a2e; background: var(--light); line-height: 1.6; -webkit-font-smoothing: antialiased; }
 .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
 
 /* NAV */
-nav { padding: 16px 0; background: rgba(10,10,20,0.95); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(201,169,110,0.15); position: sticky; top: 0; z-index: 100; }
+nav { padding: 14px 0; background: rgba(255,255,255,0.92); backdrop-filter: blur(14px); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 100; }
 nav .container { display: flex; align-items: center; justify-content: space-between; }
-.logo { font-family: 'Playfair Display', serif; font-size: 24px; font-weight: 700; color: #fff; letter-spacing: -0.5px; }
-.logo span { color: var(--gold); font-style: italic; }
+.logo { display: flex; align-items: center; gap: 10px; font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 700; color: #1a1a2e; letter-spacing: -0.5px; text-decoration: none; }
+.logo-mark { width: 38px; height: 38px; flex-shrink: 0; }
+.logo-text { line-height: 1; }
+.logo-text .accent { color: var(--gold); font-style: italic; }
+.logo-text small { display: block; font-family: 'Inter', sans-serif; font-size: 9px; font-weight: 500; color: var(--gray); letter-spacing: 3px; text-transform: uppercase; margin-top: 2px; }
+nav .btn-outline { color: #1a1a2e; border-color: var(--border); }
+nav .btn-outline:hover { border-color: var(--gold); color: var(--gold); background: transparent; }
 .btn { display: inline-flex; align-items: center; justify-content: center; padding: 14px 28px; border-radius: 8px; font-weight: 600; text-decoration: none; cursor: pointer; transition: all 0.25s; border: none; font-size: 15px; font-family: inherit; }
 .btn-primary { background: var(--gold); color: #fff; box-shadow: 0 8px 24px -8px rgba(201,169,110,0.6); }
 .btn-primary:hover { background: var(--gold-dark); transform: translateY(-2px); box-shadow: 0 12px 32px -8px rgba(201,169,110,0.7); }
@@ -70,27 +76,29 @@ nav .container { display: flex; align-items: center; justify-content: space-betw
 }
 
 /* HERO */
-.hero { position: relative; min-height: 100vh; padding: 80px 0 60px; overflow: hidden; background: var(--dark); color: #fff; display: flex; align-items: center; }
+.hero { position: relative; min-height: 88vh; padding: 70px 0 50px; overflow: hidden; background: linear-gradient(180deg, #fbfaf7 0%, #f5f0e6 100%); color: #1a1a2e; display: flex; align-items: center; }
 .hero-bg { position: absolute; inset: 0; z-index: 0; }
 .hero-bg .slide { position: absolute; inset: 0; background-size: cover; background-position: center; opacity: 0; transition: opacity 1.5s ease; transform: scale(1.05); }
-.hero-bg .slide.active { opacity: 0.45; animation: kenBurns 12s ease-in-out infinite; }
+.hero-bg .slide.active { opacity: 0.18; animation: kenBurns 12s ease-in-out infinite; }
 @keyframes kenBurns {
   0%, 100% { transform: scale(1.05) translate(0,0); }
-  50% { transform: scale(1.15) translate(-1%, -1%); }
+  50% { transform: scale(1.12) translate(-1%, -1%); }
 }
-.hero-bg::after { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(10,10,20,0.4) 0%, rgba(10,10,20,0.85) 100%); z-index: 1; }
+.hero-bg::after { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(251,250,247,0.55) 0%, rgba(245,240,230,0.85) 100%); z-index: 1; }
 .hero .container { position: relative; z-index: 2; }
-.hero-tag { display: inline-block; padding: 8px 18px; border: 1px solid rgba(201,169,110,0.5); background: rgba(201,169,110,0.12); border-radius: 30px; color: var(--gold); font-size: 12px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 28px; animation: fadeUp 0.8s ease both; }
-.hero h1 { font-family: 'Playfair Display', serif; font-size: clamp(2.2rem, 6vw, 4.5rem); font-weight: 700; line-height: 1.05; max-width: 920px; margin-bottom: 24px; letter-spacing: -1.5px; animation: fadeUp 1s ease 0.2s both; }
-.hero h1 em { color: var(--gold); font-style: italic; }
-.hero p.lead { font-size: clamp(1.05rem, 1.6vw, 1.3rem); color: rgba(255,255,255,0.78); max-width: 720px; margin-bottom: 16px; animation: fadeUp 1s ease 0.4s both; font-weight: 300; }
-.hero p.warning { font-size: 14px; color: var(--warning); margin-bottom: 36px; animation: fadeUp 1s ease 0.6s both; font-weight: 500; }
-.hero-cta { display: flex; gap: 16px; flex-wrap: wrap; animation: fadeUp 1s ease 0.8s both; }
+.hero-tag { display: inline-block; padding: 7px 16px; border: 1px solid rgba(184,146,74,0.4); background: rgba(184,146,74,0.08); border-radius: 30px; color: var(--gold-dark); font-size: 11px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 24px; animation: fadeUp 0.8s ease both; }
+.hero h1 { font-family: 'Playfair Display', serif; font-size: clamp(2rem, 5.2vw, 3.8rem); font-weight: 700; line-height: 1.1; max-width: 880px; margin-bottom: 22px; letter-spacing: -1px; color: #1a1a2e; animation: fadeUp 1s ease 0.2s both; }
+.hero h1 em { color: var(--gold-dark); font-style: italic; }
+.hero p.lead { font-size: clamp(1rem, 1.4vw, 1.18rem); color: #4a4a5e; max-width: 700px; margin-bottom: 14px; animation: fadeUp 1s ease 0.4s both; font-weight: 400; }
+.hero p.warning { font-size: 13px; color: var(--warning); margin-bottom: 32px; animation: fadeUp 1s ease 0.6s both; font-weight: 500; }
+.hero-cta { display: flex; gap: 14px; flex-wrap: wrap; animation: fadeUp 1s ease 0.8s both; }
+.hero .btn-outline { color: #1a1a2e; border: 1px solid rgba(26,26,46,0.15); }
+.hero .btn-outline:hover { border-color: var(--gold); color: var(--gold-dark); }
 @keyframes fadeUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
-.hero-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 24px; margin-top: 60px; max-width: 720px; animation: fadeUp 1.2s ease 1s both; }
-.stat { text-align: left; padding-left: 20px; border-left: 2px solid var(--gold); }
-.stat-num { font-family: 'Playfair Display', serif; font-size: clamp(1.6rem, 3vw, 2.4rem); font-weight: 700; color: var(--gold); line-height: 1; margin-bottom: 4px; }
-.stat-label { font-size: 12px; color: rgba(255,255,255,0.65); text-transform: uppercase; letter-spacing: 1.5px; }
+.hero-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 24px; margin-top: 50px; max-width: 720px; animation: fadeUp 1.2s ease 1s both; }
+.stat { text-align: left; padding-left: 18px; border-left: 2px solid var(--gold); }
+.stat-num { font-family: 'Playfair Display', serif; font-size: clamp(1.5rem, 2.8vw, 2.2rem); font-weight: 700; color: var(--gold-dark); line-height: 1; margin-bottom: 4px; }
+.stat-label { font-size: 11px; color: var(--gray); text-transform: uppercase; letter-spacing: 1.5px; }
 
 /* ALERT BANNER */
 .alert-banner { background: linear-gradient(90deg, var(--danger), #b91c1c); color: #fff; padding: 14px 0; text-align: center; font-size: 14px; font-weight: 600; position: relative; overflow: hidden; }
@@ -295,7 +303,17 @@ footer a { color: var(--gold); text-decoration: none; }
 
 <nav>
   <div class="container">
-    <div class="logo">Só<span>Casa</span>Top</div>
+    <a href="/" class="logo">
+      <svg class="logo-mark" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color: #b8924a;">
+        <path d="M10 30 L32 12 L54 30 V52 a2 2 0 0 1 -2 2 H12 a2 2 0 0 1 -2 -2 Z" fill="rgba(184,146,74,0.08)"/>
+        <path d="M26 54 V38 a2 2 0 0 1 2 -2 h8 a2 2 0 0 1 2 2 V54"/>
+        <circle cx="32" cy="26" r="3" fill="#b8924a" stroke="none"/>
+      </svg>
+      <span class="logo-text">
+        Só<span class="accent">Casa</span>Top
+        <small>Imóveis de Alto Padrão</small>
+      </span>
+    </a>
     <a href="#vagas" class="btn btn-primary">Quero ser parceiro</a>
   </div>
 </nav>

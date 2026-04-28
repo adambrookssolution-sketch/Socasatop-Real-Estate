@@ -15,6 +15,7 @@ function authHeaders() {
     'Authorization': 'Bearer ' + PAGBANK_TOKEN,
     'Content-Type': 'application/json',
     'Accept': 'application/json',
+    'User-Agent': 'SoCasaTop/1.0 (+https://socasatop.com.br)',
   };
 }
 
