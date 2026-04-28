@@ -165,18 +165,27 @@ async function enviarContrato(req, res) {
       });
     }
 
-    const valorReais = PLAN_VALOR_CENTAVOS / 100;
-    const conteudoBase64 = clicksign.gerarContratoBase64({
+    const { data: regioesParc } = await supabase
+      .from('parceiros_regioes')
+      .select('regiao_id, regioes(nome)')
+      .eq('parceiro_id', parceiroId)
+      .in('status', ['reservado', 'ocupado']);
+    const nomesRegioes = (regioesParc || []).map(x => x.regioes && x.regioes.nome).filter(Boolean);
+    const regioesFinal = nomesRegioes.length ? nomesRegioes : [(p.regioes && p.regioes.nome) || 'N/A'];
+    const numRegioes = regioesFinal.length;
+    const valorReais = calcularValorCentavos(numRegioes) / 100;
+
+    const conteudoBase64 = await clicksign.gerarContratoBase64({
       nome: p.nome,
       cpf: p.cpf_cnpj,
-      regiao: (p.regioes && p.regioes.nome) || 'N/A',
+      regioes: regioesFinal,
       valor: valorReais,
     });
 
     const doc = await clicksign.criarDocumento({
       nome: 'contrato-parceiro-' + parceiroId + '.pdf',
       conteudoBase64,
-      mimetype: 'text/plain',
+      mimetype: 'application/pdf',
     });
 
     const signer = await clicksign.adicionarSignatario({
@@ -236,6 +245,22 @@ async function cadastrarCartao(req, res) {
         proxima_cobranca_em: trialEndsAt,
         mock: true,
         message: 'Modo simulado. Cartao "registrado", trial 21 dias iniciado.',
+      });
+    }
+
+    const validacao = await pagbank.validarCartao({
+      cardToken: card_token,
+      holderName: holder_name || p.nome,
+      holderTaxId: holder_tax_id || p.cpf_cnpj,
+      customerEmail: p.email,
+    });
+    await logEvento(parceiroId, 'cartao_validado', validacao);
+    if (!validacao.valid) {
+      return res.status(402).json({
+        error: 'Cartao recusado na validacao de R$ 0,01',
+        status: validacao.status,
+        response_message: validacao.response_message,
+        response_code: validacao.response_code,
       });
     }
 

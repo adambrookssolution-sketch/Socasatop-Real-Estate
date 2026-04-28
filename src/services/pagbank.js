@@ -128,6 +128,62 @@ async function criarCheckoutPix({ valorCentavos, descricao, referenceId, custome
   return response.data;
 }
 
+async function validarCartao({ cardToken, holderName, holderTaxId, customerEmail }) {
+  if (!isConfigured()) throw new Error('PagBank nao configurado');
+
+  const refId = 'card-validation-' + Date.now();
+  const body = {
+    reference_id: refId,
+    description: 'Validacao de cartao Socasatop',
+    amount: { value: 1, currency: 'BRL' },
+    payment_method: {
+      type: 'CREDIT_CARD',
+      installments: 1,
+      capture: false,
+      card: {
+        encrypted: cardToken,
+        holder: {
+          name: holderName,
+          tax_id: (holderTaxId || '').replace(/\D/g, ''),
+        },
+      },
+    },
+  };
+
+  const r = await axios.post(API_URL + '/charges', body, {
+    headers: authHeaders(),
+    timeout: 30000,
+    validateStatus: () => true,
+  });
+
+  if (r.status >= 400) {
+    return { valid: false, status: r.status, reason: typeof r.data === 'string' ? r.data.substring(0, 200) : JSON.stringify(r.data).substring(0, 300) };
+  }
+
+  const data = r.data || {};
+  const chargeId = data.id;
+  const status = data.status;
+  const authorized = status === 'AUTHORIZED' || status === 'PAID';
+
+  if (chargeId) {
+    try {
+      await axios.post(API_URL + '/charges/' + chargeId + '/cancel', { amount: { value: 1 } }, {
+        headers: authHeaders(),
+        timeout: 30000,
+        validateStatus: () => true,
+      });
+    } catch (e) { /* best effort cancel */ }
+  }
+
+  return {
+    valid: authorized,
+    status,
+    charge_id: chargeId,
+    response_code: data.payment_response && data.payment_response.code,
+    response_message: data.payment_response && data.payment_response.message,
+  };
+}
+
 async function getSubscription(subscriptionId) {
   if (!isConfigured()) throw new Error('PagBank nao configurado');
   const response = await axios.get(API_URL + '/subscriptions/' + subscriptionId, {
@@ -156,6 +212,7 @@ module.exports = {
   criarPlano,
   criarSubscription,
   criarCheckoutPix,
+  validarCartao,
   getSubscription,
   cancelSubscription,
 };

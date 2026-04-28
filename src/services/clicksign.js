@@ -1,7 +1,15 @@
 const axios = require('axios');
+const PDFDocument = require('pdfkit');
 
 const CLICKSIGN_TOKEN = process.env.CLICKSIGN_TOKEN || '';
 const CLICKSIGN_API = process.env.CLICKSIGN_API || 'https://app.clicksign.com';
+
+const EMPRESA = {
+  razao_social: process.env.EMPRESA_RAZAO_SOCIAL || 'So Casa Top Marketing e Negocios Imobiliarios Ltda',
+  cnpj: process.env.EMPRESA_CNPJ || '39.938.529/0001-96',
+  endereco: process.env.EMPRESA_ENDERECO || 'Rua 9 Norte, Lote 5, Numero 5/6, Aguas Claras, Brasilia - DF, CEP 71908-540',
+  prazo_pagamento: process.env.EMPRESA_PRAZO_PAGAMENTO || 'todo dia 10 de cada mes',
+};
 
 function isConfigured() {
   return !!CLICKSIGN_TOKEN;
@@ -91,28 +99,68 @@ async function getDocumento(documentKey) {
   return response.data.document;
 }
 
-function gerarContratoBase64({ nome, cpf, regiao, valor }) {
-  const conteudo = `CONTRATO DE PARCERIA - SO CASA TOP
+function gerarContratoPdfBuffer({ nome, cpf, regioes, valor }) {
+  return new Promise((resolve, reject) => {
+    const doc = new PDFDocument({ size: 'A4', margin: 56 });
+    const chunks = [];
+    doc.on('data', c => chunks.push(c));
+    doc.on('end', () => resolve(Buffer.concat(chunks)));
+    doc.on('error', reject);
 
-Parte 1: SO CASA TOP IMOVEIS
-Parte 2: ${nome}
-CPF/CNPJ: ${cpf || '(nao informado)'}
-Regiao: ${regiao}
-Valor da assinatura mensal: R$ ${valor.toFixed(2).replace('.', ',')}
+    const regioesStr = Array.isArray(regioes) ? regioes.join(', ') : (regioes || 'N/A');
+    const valorStr = 'R$ ' + Number(valor || 0).toFixed(2).replace('.', ',');
+    const hoje = new Date().toLocaleDateString('pt-BR');
 
-Este contrato firma a parceria entre as partes nos termos abaixo:
+    doc.font('Helvetica-Bold').fontSize(16).text('CONTRATO DE PARCERIA - SO CASA TOP', { align: 'center' });
+    doc.moveDown(1.5);
 
-1. O parceiro tera acesso a plataforma So Casa Top na regiao designada.
-2. Limite de 5 parceiros por regiao.
-3. Periodo de 21 dias gratuitos. Apos esse periodo, sera cobrada a mensalidade automaticamente.
-4. O cancelamento pode ser feito a qualquer momento.
-5. As regras gerais da plataforma se aplicam.
+    doc.font('Helvetica-Bold').fontSize(11).text('CONTRATANTE:');
+    doc.font('Helvetica').fontSize(10);
+    doc.text(EMPRESA.razao_social);
+    doc.text('CNPJ: ' + EMPRESA.cnpj);
+    doc.text('Endereco: ' + EMPRESA.endereco);
+    doc.moveDown(0.8);
 
-Data: ${new Date().toLocaleDateString('pt-BR')}
+    doc.font('Helvetica-Bold').fontSize(11).text('CONTRATADO (PARCEIRO):');
+    doc.font('Helvetica').fontSize(10);
+    doc.text('Nome: ' + (nome || '(nao informado)'));
+    doc.text('CPF/CNPJ: ' + (cpf || '(nao informado)'));
+    doc.text('Regiao(oes) de atuacao: ' + regioesStr);
+    doc.text('Valor mensal: ' + valorStr);
+    doc.moveDown(1);
 
-Assinaturas pelas partes via ClickSign.
-`;
-  return Buffer.from(conteudo, 'utf-8').toString('base64');
+    doc.font('Helvetica-Bold').fontSize(11).text('CLAUSULAS:');
+    doc.moveDown(0.3);
+    doc.font('Helvetica').fontSize(10);
+
+    const clausulas = [
+      '1. OBJETO. O CONTRATANTE concede ao CONTRATADO acesso a plataforma So Casa Top, com direito de atuacao na(s) regiao(oes) acima indicada(s), em regime de exclusividade limitada (maximo de 5 parceiros por regiao).',
+      '2. PERIODO DE TESTE. O CONTRATADO usufruira de 21 (vinte e um) dias gratuitos a contar da assinatura deste contrato. Apos esse periodo, o cartao de credito cadastrado sera cobrado automaticamente, ' + EMPRESA.prazo_pagamento + ', no valor de ' + valorStr + '.',
+      '3. VALIDACAO DE CARTAO. No ato do cadastro do meio de pagamento, podera ser efetuada uma cobranca simbolica de R$ 0,01 (um centavo), imediatamente cancelada, com o unico proposito de validar a autenticidade do cartao.',
+      '4. CANCELAMENTO. O CONTRATADO pode cancelar a assinatura a qualquer momento sem multa, com efeitos a partir do proximo ciclo de cobranca.',
+      '5. INADIMPLENCIA. O nao pagamento por 7 (sete) dias suspende o acesso a plataforma. Apos 30 (trinta) dias de inadimplencia, a vaga e liberada para outro parceiro.',
+      '6. DIREITOS DE USO. O CONTRATADO recebe leads gerados na regiao, acesso a IA de curadoria de imoveis, e divulgacao por canais oficiais da plataforma.',
+      '7. CONDUTA. O CONTRATADO compromete-se a tratar leads com profissionalismo, manter dados atualizados e respeitar as politicas da plataforma.',
+      '8. PROTECAO DE DADOS. As partes se comprometem ao cumprimento da LGPD (Lei 13.709/2018).',
+      '9. FORO. Fica eleito o foro da comarca de Brasilia-DF para dirimir quaisquer questoes oriundas deste contrato.',
+    ];
+    for (const cl of clausulas) {
+      doc.text(cl, { align: 'justify' });
+      doc.moveDown(0.4);
+    }
+
+    doc.moveDown(1.5);
+    doc.text('Brasilia-DF, ' + hoje + '.');
+    doc.moveDown(1);
+    doc.text('Assinaturas pelas partes via ClickSign (assinatura digital com validade juridica - MP 2.200-2/2001).');
+
+    doc.end();
+  });
+}
+
+async function gerarContratoBase64(args) {
+  const buf = await gerarContratoPdfBuffer(args);
+  return buf.toString('base64');
 }
 
 module.exports = {
@@ -122,4 +170,6 @@ module.exports = {
   vincularSignatario,
   getDocumento,
   gerarContratoBase64,
+  gerarContratoPdfBuffer,
+  EMPRESA,
 };
