@@ -55,11 +55,13 @@ function render() {
   --danger: #dc2626;
   --warning: #1f8d97;
 }
-html, body { max-width: 100vw; overflow-x: hidden; font-family: 'Inter', sans-serif; color: #0f3a5b; background: var(--light); line-height: 1.6; -webkit-font-smoothing: antialiased; }
+html { -webkit-text-size-adjust: 100%; }
+html, body { width: 100%; overflow-x: hidden; font-family: 'Inter', sans-serif; color: #0f3a5b; background: var(--light); line-height: 1.6; -webkit-font-smoothing: antialiased; }
+body { min-height: 100vh; }
 .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
 
 /* NAV */
-nav { padding: 14px 0; background: rgba(255,255,255,0.92); backdrop-filter: blur(14px); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 100; }
+nav { padding: 14px 0; background: rgba(255,255,255,0.96); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 100; }
 nav .container { display: flex; align-items: center; justify-content: space-between; }
 .logo { display: flex; align-items: center; text-decoration: none; }
 .logo-img { height: 48px; width: auto; display: block; }
@@ -81,7 +83,9 @@ nav .btn-outline:hover { border-color: var(--gold); color: var(--gold); backgrou
 }
 
 /* HERO */
-.hero { position: relative; min-height: 88vh; padding: 70px 0 50px; overflow: hidden; background: linear-gradient(180deg, #fbfbfc 0%, #eef4f8 100%); color: #0f3a5b; display: flex; align-items: center; }
+.hero { position: relative; min-height: 600px; padding: 70px 0 50px; overflow: hidden; background: linear-gradient(180deg, #fbfbfc 0%, #eef4f8 100%); color: #0f3a5b; display: flex; align-items: center; }
+@supports (min-height: 88dvh) { .hero { min-height: 88dvh; } }
+@media (min-width: 600px) { .hero { min-height: 80vh; } }
 .hero-bg { position: absolute; inset: 0; z-index: 0; }
 .hero-bg .slide { position: absolute; inset: 0; background-size: cover; background-position: center; opacity: 0; transition: opacity 1.5s ease; transform: scale(1.05); }
 .hero-bg .slide.active { opacity: 0.18; animation: kenBurns 12s ease-in-out infinite; }
@@ -296,8 +300,12 @@ footer a { color: var(--gold); text-decoration: none; }
 }
 
 /* SCROLL ANIMATIONS */
-.reveal { opacity: 0; transform: translateY(30px); transition: opacity 0.8s ease, transform 0.8s ease; }
+.reveal { opacity: 1; transform: none; transition: opacity 0.8s ease, transform 0.8s ease; }
+.js-reveal-active .reveal:not(.visible) { opacity: 0; transform: translateY(30px); }
 .reveal.visible { opacity: 1; transform: translateY(0); }
+@media (prefers-reduced-motion: reduce) {
+  .reveal, .reveal.visible { opacity: 1 !important; transform: none !important; transition: none !important; }
+}
 </style>
 </head>
 <body>
@@ -602,7 +610,15 @@ footer a { color: var(--gold); text-decoration: none; }
 </div>
 
 <script>
-let regioes = [];
+window.addEventListener('error', function(e) {
+  console.error('[LP error]', e.message, e.filename, e.lineno);
+});
+
+if ('IntersectionObserver' in window) {
+  document.documentElement.classList.add('js-reveal-active');
+}
+
+var regioes = [];
 
 function setupHeroSlider() {
   const slides = document.querySelectorAll('#hero-bg .slide');
@@ -819,16 +835,28 @@ async function enviarCadastro(e) {
   }
 }
 
-document.querySelectorAll('.faq-item').forEach(item => {
-  item.querySelector('.faq-q').addEventListener('click', () => item.classList.toggle('open'));
-});
-
-const observer = new IntersectionObserver(entries => {
-  entries.forEach(entry => {
-    if (entry.isIntersecting) entry.target.classList.add('visible');
+try {
+  document.querySelectorAll('.faq-item').forEach(function(item) {
+    var q = item.querySelector('.faq-q');
+    if (q) q.addEventListener('click', function() { item.classList.toggle('open'); });
   });
-}, { threshold: 0.15 });
-document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+} catch(e) { console.error('faq', e); }
+
+try {
+  if ('IntersectionObserver' in window) {
+    var observer = new IntersectionObserver(function(entries) {
+      entries.forEach(function(entry) {
+        if (entry.isIntersecting) entry.target.classList.add('visible');
+      });
+    }, { threshold: 0.15 });
+    document.querySelectorAll('.reveal').forEach(function(el) { observer.observe(el); });
+  } else {
+    document.querySelectorAll('.reveal').forEach(function(el) { el.classList.add('visible'); });
+  }
+} catch(e) {
+  console.error('reveal', e);
+  document.querySelectorAll('.reveal').forEach(function(el) { el.classList.add('visible'); });
+}
 
 function formatCount(n, format) {
   n = Math.round(n);
@@ -874,22 +902,34 @@ function animateCount(el) {
   requestAnimationFrame(tick);
 }
 
-var countObserver = new IntersectionObserver(function(entries) {
-  entries.forEach(function(entry) {
-    if (entry.isIntersecting) {
-      animateCount(entry.target);
-      countObserver.unobserve(entry.target);
-    }
-  });
-}, { threshold: 0.4 });
-document.querySelectorAll('[data-count]').forEach(function(el) {
-  el.textContent = formatCount(0, el.dataset.format || 'int');
-  countObserver.observe(el);
-});
+try {
+  if ('IntersectionObserver' in window) {
+    var countObserver = new IntersectionObserver(function(entries) {
+      entries.forEach(function(entry) {
+        if (entry.isIntersecting) {
+          animateCount(entry.target);
+          countObserver.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.4 });
+    document.querySelectorAll('[data-count]').forEach(function(el) {
+      el.textContent = formatCount(0, el.dataset.format || 'int');
+      countObserver.observe(el);
+    });
+  } else {
+    document.querySelectorAll('[data-count]').forEach(function(el) {
+      var target = parseInt(el.dataset.count, 10) || 0;
+      var format = el.dataset.format || 'int';
+      var suffix = el.dataset.suffix || '';
+      el.textContent = (el.dataset.prefix || '') + formatCount(target, format) + suffix;
+    });
+  }
+} catch(e) {
+  console.error('count', e);
+}
 
-setupHeroSlider();
-loadRegioes();
-setInterval(loadRegioes, 30000);
+try { setupHeroSlider(); } catch(e) { console.error('hero', e); }
+try { loadRegioes(); setInterval(loadRegioes, 30000); } catch(e) { console.error('regioes', e); }
 </script>
 
 </body>
