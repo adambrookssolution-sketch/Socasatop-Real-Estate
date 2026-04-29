@@ -58,6 +58,16 @@ const landingView = require('./views/landing');
 app.get('/parceiros', (req, res) => res.send(landingView.render()));
 app.get('/seja-parceiro', (req, res) => res.send(landingView.render()));
 
+app.get('/parceiros-test', (req, res) => {
+  res.set('Cache-Control', 'no-store, no-cache, must-revalidate');
+  res.send('<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>TESTE</title></head><body style="margin:0;padding:0;font-family:Arial,sans-serif;"><div style="background:#dc2626;color:#fff;padding:40px 20px;text-align:center;font-size:32px;font-weight:bold;">TESTE OK</div><div style="padding:30px 20px;font-size:18px;line-height:1.6;color:#0f3a5b;">Se voce esta vendo este texto e o quadrado vermelho acima, a conexao com o servidor So Casa Top esta funcionando perfeitamente no seu navegador.<br><br>UA: <span id="ua" style="font-family:monospace;font-size:12px;color:#666;"></span><br><br>Hora: <span id="t" style="font-family:monospace;font-size:14px;color:#666;"></span></div><script>document.getElementById("ua").textContent=navigator.userAgent;document.getElementById("t").textContent=new Date().toLocaleString("pt-BR");</script></body></html>');
+});
+
+app.post('/api/_debug/lp-error', express.json({ limit: '50kb' }), (req, res) => {
+  console.log('[LP DEBUG]', JSON.stringify(req.body || {}).substring(0, 500));
+  res.json({ logged: true });
+});
+
 // Galeria (token-based management UI)
 const galeriaRoutes = require('./routes/galeria');
 app.use('/api/galeria', galeriaRoutes.apiRouter);
