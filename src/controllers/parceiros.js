@@ -27,6 +27,7 @@ async function reservarVaga({ regiaoId }) {
     .eq('ativo', true)
     .maybeSingle();
   if (rErr || !regiao) throw new Error('Regiao nao encontrada');
+  const seed = regiao.vagas_seed || 0;
   if ((regiao.vagas_ocupadas || 0) >= (regiao.vagas_total || 0)) {
     throw new Error('Vagas esgotadas para ' + regiao.nome);
   }
@@ -35,19 +36,23 @@ async function reservarVaga({ regiaoId }) {
     .select('*', { count: 'exact', head: true })
     .eq('regiao_id', regiaoId)
     .in('status', ['reservado', 'ocupado']);
-  if ((count || 0) >= (regiao.vagas_total || 0)) {
+  if (((count || 0) + seed) >= (regiao.vagas_total || 0)) {
     throw new Error('Vagas esgotadas para ' + regiao.nome + ' (verificacao em tempo real)');
   }
   return regiao;
 }
 
 async function atualizarContadorRegiao(regiaoId) {
+  const { data: regiao } = await supabase.from('regioes').select('vagas_seed, vagas_total').eq('id', regiaoId).maybeSingle();
+  const seed = (regiao && regiao.vagas_seed) || 0;
+  const total = (regiao && regiao.vagas_total) || 0;
   const { count } = await supabase
     .from('parceiros')
     .select('*', { count: 'exact', head: true })
     .eq('regiao_id', regiaoId)
     .in('status', ['reservado', 'ocupado']);
-  await supabase.from('regioes').update({ vagas_ocupadas: count || 0 }).eq('id', regiaoId);
+  const ocupadas = Math.min(total, (count || 0) + seed);
+  await supabase.from('regioes').update({ vagas_ocupadas: ocupadas }).eq('id', regiaoId);
 }
 
 async function iniciarCadastro(req, res) {

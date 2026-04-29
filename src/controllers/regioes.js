@@ -44,7 +44,7 @@ async function getBySlug(req, res) {
 
 async function recontar(req, res) {
   try {
-    const { data: regs } = await supabase.from('regioes').select('id');
+    const { data: regs } = await supabase.from('regioes').select('id, vagas_seed, vagas_total');
     let total = 0;
     for (const r of regs || []) {
       const { count } = await supabase
@@ -52,7 +52,10 @@ async function recontar(req, res) {
         .select('*', { count: 'exact', head: true })
         .eq('regiao_id', r.id)
         .in('status', ['reservado', 'ocupado']);
-      await supabase.from('regioes').update({ vagas_ocupadas: count || 0 }).eq('id', r.id);
+      const seed = r.vagas_seed || 0;
+      const max = r.vagas_total || 0;
+      const ocupadas = Math.min(max, (count || 0) + seed);
+      await supabase.from('regioes').update({ vagas_ocupadas: ocupadas }).eq('id', r.id);
       total++;
     }
     res.json({ atualizadas: total });
