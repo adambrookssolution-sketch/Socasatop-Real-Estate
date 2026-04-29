@@ -36,16 +36,21 @@ function render() {
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
 :root {
-  --gold: #b8924a;
-  --gold-dark: #97762f;
-  --gold-light: #e8d4a8;
-  --dark: #2a2a3a;
-  --dark-2: #3a3a4a;
-  --light: #fbfaf7;
-  --cream: #f5f0e6;
+  --navy: #0f3a5b;
+  --navy-dark: #0a2740;
+  --navy-light: #1d5278;
+  --teal: #2db8c4;
+  --teal-dark: #1f8d97;
+  --gold: #2db8c4;
+  --gold-dark: #1f8d97;
+  --gold-light: #b9e6ea;
+  --dark: #0f3a5b;
+  --dark-2: #1d5278;
+  --light: #fbfbfc;
+  --cream: #eef4f8;
   --gray: #6b7280;
   --gray-light: #9ca3af;
-  --border: #ece8e0;
+  --border: #e3eaf0;
   --success: #10b981;
   --danger: #dc2626;
   --warning: #d97706;
@@ -56,11 +61,11 @@ html, body { max-width: 100vw; overflow-x: hidden; font-family: 'Inter', sans-se
 /* NAV */
 nav { padding: 14px 0; background: rgba(255,255,255,0.92); backdrop-filter: blur(14px); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 100; }
 nav .container { display: flex; align-items: center; justify-content: space-between; }
-.logo { display: flex; align-items: center; gap: 10px; font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 700; color: #1a1a2e; letter-spacing: -0.5px; text-decoration: none; }
-.logo-mark { width: 38px; height: 38px; flex-shrink: 0; }
-.logo-text { line-height: 1; }
-.logo-text .accent { color: var(--gold); font-style: italic; }
-.logo-text small { display: block; font-family: 'Inter', sans-serif; font-size: 9px; font-weight: 500; color: var(--gray); letter-spacing: 3px; text-transform: uppercase; margin-top: 2px; }
+.logo { display: flex; align-items: center; text-decoration: none; }
+.logo-img { height: 48px; width: auto; display: block; }
+@media (max-width: 600px) {
+  .logo-img { height: 38px; }
+}
 nav .btn-outline { color: #1a1a2e; border-color: var(--border); }
 nav .btn-outline:hover { border-color: var(--gold); color: var(--gold); background: transparent; }
 .btn { display: inline-flex; align-items: center; justify-content: center; padding: 14px 28px; border-radius: 8px; font-weight: 600; text-decoration: none; cursor: pointer; transition: all 0.25s; border: none; font-size: 15px; font-family: inherit; }
@@ -76,7 +81,7 @@ nav .btn-outline:hover { border-color: var(--gold); color: var(--gold); backgrou
 }
 
 /* HERO */
-.hero { position: relative; min-height: 88vh; padding: 70px 0 50px; overflow: hidden; background: linear-gradient(180deg, #fbfaf7 0%, #f5f0e6 100%); color: #1a1a2e; display: flex; align-items: center; }
+.hero { position: relative; min-height: 88vh; padding: 70px 0 50px; overflow: hidden; background: linear-gradient(180deg, #fbfbfc 0%, #eef4f8 100%); color: #0f3a5b; display: flex; align-items: center; }
 .hero-bg { position: absolute; inset: 0; z-index: 0; }
 .hero-bg .slide { position: absolute; inset: 0; background-size: cover; background-position: center; opacity: 0; transition: opacity 1.5s ease; transform: scale(1.05); }
 .hero-bg .slide.active { opacity: 0.18; animation: kenBurns 12s ease-in-out infinite; }
@@ -304,15 +309,7 @@ footer a { color: var(--gold); text-decoration: none; }
 <nav>
   <div class="container">
     <a href="/" class="logo">
-      <svg class="logo-mark" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color: #b8924a;">
-        <path d="M10 30 L32 12 L54 30 V52 a2 2 0 0 1 -2 2 H12 a2 2 0 0 1 -2 -2 Z" fill="rgba(184,146,74,0.08)"/>
-        <path d="M26 54 V38 a2 2 0 0 1 2 -2 h8 a2 2 0 0 1 2 2 V54"/>
-        <circle cx="32" cy="26" r="3" fill="#b8924a" stroke="none"/>
-      </svg>
-      <span class="logo-text">
-        Só<span class="accent">Casa</span>Top
-        <small>Imóveis de Alto Padrão</small>
-      </span>
+      <img src="/img/logo_nav.png" alt="Só Casa Top" class="logo-img">
     </a>
     <a href="#vagas" class="btn btn-primary">Quero ser parceiro</a>
   </div>

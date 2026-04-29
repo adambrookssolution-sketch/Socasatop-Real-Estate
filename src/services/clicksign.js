@@ -1,5 +1,9 @@
 const axios = require('axios');
+const path = require('path');
+const fs = require('fs');
 const PDFDocument = require('pdfkit');
+
+const LOGO_PATH = path.resolve(__dirname, '..', '..', 'public', 'img', 'logo.png');
 
 const CLICKSIGN_TOKEN = process.env.CLICKSIGN_TOKEN || '';
 const CLICKSIGN_API = process.env.CLICKSIGN_API || 'https://app.clicksign.com';
@@ -111,6 +115,12 @@ function gerarContratoPdfBuffer({ nome, cpf, regioes, valor }) {
     const valorStr = 'R$ ' + Number(valor || 0).toFixed(2).replace('.', ',');
     const hoje = new Date().toLocaleDateString('pt-BR');
 
+    if (fs.existsSync(LOGO_PATH)) {
+      try {
+        doc.image(LOGO_PATH, { fit: [120, 60], align: 'center' });
+        doc.moveDown(0.5);
+      } catch (e) { /* skip logo on error */ }
+    }
     doc.font('Helvetica-Bold').fontSize(16).text('CONTRATO DE PARCERIA - SO CASA TOP', { align: 'center' });
     doc.moveDown(1.5);
 

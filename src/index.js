@@ -15,6 +15,11 @@ app.use(compression());
 app.use(cors());
 app.use(express.json({ limit: '10mb' }));
 
+app.use('/img', express.static(require('path').resolve(__dirname, '..', 'public', 'img'), {
+  maxAge: '7d',
+  immutable: false,
+}));
+
 app.use('/api/imoveis', (req, res, next) => {
   if (req.method === 'GET') {
     res.set('Cache-Control', 'public, max-age=60, s-maxage=120');
