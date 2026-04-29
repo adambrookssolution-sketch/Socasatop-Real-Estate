@@ -610,13 +610,28 @@ footer a { color: var(--gold); text-decoration: none; }
 </div>
 
 <script>
+function _dbg(step, extra) {
+  try {
+    var img = new Image();
+    var u = '/api/_debug/lp-error?step=' + encodeURIComponent(step);
+    if (extra) u += '&info=' + encodeURIComponent(String(extra).substring(0, 200));
+    u += '&t=' + Date.now();
+    img.src = u;
+  } catch(e) {}
+}
+_dbg('script-start');
+
 window.addEventListener('error', function(e) {
-  console.error('[LP error]', e.message, e.filename, e.lineno);
+  _dbg('runtime-error', (e.message || '') + ' @ ' + (e.filename || '?') + ':' + (e.lineno || '?'));
+});
+window.addEventListener('unhandledrejection', function(e) {
+  _dbg('promise-reject', String((e.reason && e.reason.message) || e.reason || '?'));
 });
 
 if ('IntersectionObserver' in window) {
   document.documentElement.classList.add('js-reveal-active');
 }
+_dbg('after-io-check');
 
 var regioes = [];
 
@@ -835,13 +850,16 @@ async function enviarCadastro(e) {
   }
 }
 
+_dbg('before-faq');
 try {
   document.querySelectorAll('.faq-item').forEach(function(item) {
     var q = item.querySelector('.faq-q');
     if (q) q.addEventListener('click', function() { item.classList.toggle('open'); });
   });
-} catch(e) { console.error('faq', e); }
+  _dbg('faq-ok');
+} catch(e) { _dbg('faq-fail', e.message); }
 
+_dbg('before-reveal');
 try {
   if ('IntersectionObserver' in window) {
     var observer = new IntersectionObserver(function(entries) {
@@ -853,8 +871,9 @@ try {
   } else {
     document.querySelectorAll('.reveal').forEach(function(el) { el.classList.add('visible'); });
   }
+  _dbg('reveal-ok');
 } catch(e) {
-  console.error('reveal', e);
+  _dbg('reveal-fail', e.message);
   document.querySelectorAll('.reveal').forEach(function(el) { el.classList.add('visible'); });
 }
 
@@ -902,6 +921,7 @@ function animateCount(el) {
   requestAnimationFrame(tick);
 }
 
+_dbg('before-count');
 try {
   if ('IntersectionObserver' in window) {
     var countObserver = new IntersectionObserver(function(entries) {
@@ -924,12 +944,14 @@ try {
       el.textContent = (el.dataset.prefix || '') + formatCount(target, format) + suffix;
     });
   }
-} catch(e) {
-  console.error('count', e);
-}
+  _dbg('count-ok');
+} catch(e) { _dbg('count-fail', e.message); }
 
-try { setupHeroSlider(); } catch(e) { console.error('hero', e); }
-try { loadRegioes(); setInterval(loadRegioes, 30000); } catch(e) { console.error('regioes', e); }
+_dbg('before-hero');
+try { setupHeroSlider(); _dbg('hero-ok'); } catch(e) { _dbg('hero-fail', e.message); }
+_dbg('before-regioes');
+try { loadRegioes(); setInterval(loadRegioes, 30000); _dbg('regioes-ok'); } catch(e) { _dbg('regioes-fail', e.message); }
+_dbg('script-end');
 </script>
 
 </body>

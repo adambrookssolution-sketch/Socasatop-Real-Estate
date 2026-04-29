@@ -63,9 +63,14 @@ app.get('/parceiros-test', (req, res) => {
   res.send('<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>TESTE</title></head><body style="margin:0;padding:0;font-family:Arial,sans-serif;"><div style="background:#dc2626;color:#fff;padding:40px 20px;text-align:center;font-size:32px;font-weight:bold;">TESTE OK</div><div style="padding:30px 20px;font-size:18px;line-height:1.6;color:#0f3a5b;">Se voce esta vendo este texto e o quadrado vermelho acima, a conexao com o servidor So Casa Top esta funcionando perfeitamente no seu navegador.<br><br>UA: <span id="ua" style="font-family:monospace;font-size:12px;color:#666;"></span><br><br>Hora: <span id="t" style="font-family:monospace;font-size:14px;color:#666;"></span></div><script>document.getElementById("ua").textContent=navigator.userAgent;document.getElementById("t").textContent=new Date().toLocaleString("pt-BR");</script></body></html>');
 });
 
-app.post('/api/_debug/lp-error', express.json({ limit: '50kb' }), (req, res) => {
-  console.log('[LP DEBUG]', JSON.stringify(req.body || {}).substring(0, 500));
-  res.json({ logged: true });
+app.all('/api/_debug/lp-error', express.json({ limit: '50kb' }), (req, res) => {
+  const ua = (req.headers['user-agent'] || '').substring(0, 80);
+  const ip = (req.headers['x-forwarded-for'] || req.ip || '').toString().substring(0, 40);
+  const q = req.query || {};
+  const body = req.body || {};
+  console.log('[LP-DBG]', ip, '|', q.step || body.step || '?', '|', q.info || body.info || '', '|', ua);
+  res.set('Cache-Control', 'no-store');
+  res.status(200).end();
 });
 
 // Galeria (token-based management UI)
