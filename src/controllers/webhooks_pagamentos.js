@@ -1,6 +1,7 @@
 const supabase = require('../config/supabase');
 const parceirosCtrl = require('./parceiros');
 const creditos = require('../services/creditos');
+const notifyAdm = require('../services/notify_adm');
 
 async function pagbankWebhook(req, res) {
   try {
@@ -30,6 +31,7 @@ async function pagbankWebhook(req, res) {
         } else if (status === 'PAST_DUE' || tipo === 'subscription.failed') {
           updates.subscription_failed_at = new Date().toISOString();
           updates.status = 'suspenso';
+          notifyAdm.pagamentoFalhou(parceiro, status || tipo).catch(() => {});
         } else if (status === 'CANCELED' || tipo === 'subscription.canceled') {
           updates.status = 'cancelado';
         }
@@ -90,6 +92,7 @@ async function clicksignWebhook(req, res) {
             contract_signed_at: new Date().toISOString(),
             updated_at: new Date().toISOString(),
           }).eq('id', parceiro.id);
+          notifyAdm.contratoAssinado(parceiro).catch(() => {});
         }
       }
     }

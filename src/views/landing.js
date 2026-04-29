@@ -573,6 +573,17 @@ footer a { color: var(--gold); text-decoration: none; }
     <p class="modal-subtitle" id="modal-subtitle"></p>
     <form id="form-cadastro" onsubmit="enviarCadastro(event)">
       <input type="hidden" name="regiao_id" id="form-regiao-id">
+      <div class="form-group">
+        <label>Sou *</label>
+        <div style="display: flex; gap: 16px; padding: 8px 0;">
+          <label style="display: flex; align-items: center; gap: 6px; font-weight: normal; cursor: pointer;">
+            <input type="radio" name="tipo_parceiro" value="corretor" checked onchange="onTipoParceiroChange()"> Corretor (PF)
+          </label>
+          <label style="display: flex; align-items: center; gap: 6px; font-weight: normal; cursor: pointer;">
+            <input type="radio" name="tipo_parceiro" value="imobiliaria" onchange="onTipoParceiroChange()"> Imobiliária (PJ)
+          </label>
+        </div>
+      </div>
       <div class="form-group"><label>Nome completo *</label><input type="text" name="nome" required></div>
       <div class="form-group"><label>WhatsApp (com DDD) *</label><input type="tel" name="whatsapp" placeholder="(61) 99999-9999" required></div>
       <div class="form-group"><label>Email *</label><input type="email" name="email" required></div>
@@ -735,17 +746,35 @@ function closeModal() {
   document.getElementById('form-msg').className = 'form-msg';
 }
 
-function onCpfCnpjInput() {
-  var el = document.getElementById('cpf-cnpj-input');
+function getTipoParceiro() {
+  var sel = document.querySelector('input[name="tipo_parceiro"]:checked');
+  return sel ? sel.value : 'corretor';
+}
+
+function onTipoParceiroChange() {
+  var tipo = getTipoParceiro();
   var pj = document.getElementById('pj-fields');
   var nome = document.getElementById('rep-nome');
   var cpf = document.getElementById('rep-cpf');
-  if (!el || !pj) return;
+  var cpfInput = document.getElementById('cpf-cnpj-input');
+  if (!pj) return;
+  var show = (tipo === 'imobiliaria');
+  pj.style.display = show ? 'block' : 'none';
+  if (nome) nome.required = show;
+  if (cpf) cpf.required = show;
+  if (cpfInput) cpfInput.placeholder = show ? 'CNPJ (apenas numeros)' : 'CPF (apenas numeros)';
+}
+
+function onCpfCnpjInput() {
+  var el = document.getElementById('cpf-cnpj-input');
+  if (!el) return;
   var digits = (el.value || '').replace(/\D/g, '');
   var isPJ = digits.length > 11;
-  pj.style.display = isPJ ? 'block' : 'none';
-  if (nome) nome.required = isPJ;
-  if (cpf) cpf.required = isPJ;
+  // auto-switch radio if user types CNPJ length
+  var radioPJ = document.querySelector('input[name="tipo_parceiro"][value="imobiliaria"]');
+  var radioPF = document.querySelector('input[name="tipo_parceiro"][value="corretor"]');
+  if (isPJ && radioPJ && !radioPJ.checked) { radioPJ.checked = true; onTipoParceiroChange(); }
+  else if (!isPJ && digits.length === 11 && radioPF && !radioPF.checked) { radioPF.checked = true; onTipoParceiroChange(); }
 }
 
 async function enviarCadastro(e) {

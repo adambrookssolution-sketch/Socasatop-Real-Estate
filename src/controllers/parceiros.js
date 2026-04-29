@@ -1,6 +1,7 @@
 const supabase = require('../config/supabase');
 const pagbank = require('../services/pagbank');
 const clicksign = require('../services/clicksign');
+const notifyAdm = require('../services/notify_adm');
 
 const PLAN_VALOR_CENTAVOS = parseInt(process.env.PARCEIRO_PLANO_CENTAVOS || '49700');
 const TRIAL_DIAS = parseInt(process.env.PARCEIRO_TRIAL_DIAS || '21');
@@ -57,14 +58,17 @@ async function atualizarContadorRegiao(regiaoId) {
 
 async function iniciarCadastro(req, res) {
   try {
-    const { nome, whatsapp, email, cpf_cnpj, creci, especialidade, endereco, representante_nome, representante_cpf, regiao_id, regiao_slug, regiao_ids, regiao_slugs, source_landing } = req.body;
+    const { nome, whatsapp, email, cpf_cnpj, creci, especialidade, endereco, representante_nome, representante_cpf, tipo_parceiro, regiao_id, regiao_slug, regiao_ids, regiao_slugs, source_landing } = req.body;
     if (!nome || !whatsapp || !email || !cpf_cnpj) {
       return res.status(400).json({ error: 'nome, whatsapp, email e cpf_cnpj obrigatorios' });
     }
     const cpfDigits = (cpf_cnpj || '').replace(/\D/g, '');
     const isPJ = cpfDigits.length === 14;
-    if (isPJ && (!representante_nome || !representante_cpf)) {
-      return res.status(400).json({ error: 'Para PJ (CNPJ), representante_nome e representante_cpf sao obrigatorios' });
+    const tipo = (tipo_parceiro === 'imobiliaria' || tipo_parceiro === 'corretor')
+      ? tipo_parceiro
+      : (isPJ ? 'imobiliaria' : 'corretor');
+    if (tipo === 'imobiliaria' && (!representante_nome || !representante_cpf)) {
+      return res.status(400).json({ error: 'Para Imobiliaria, representante_nome e representante_cpf sao obrigatorios' });
     }
 
     let regiaoIdList = [];
@@ -115,8 +119,9 @@ async function iniciarCadastro(req, res) {
         creci: creci || null,
         especialidade: especialidade || null,
         endereco: endereco || null,
-        representante_nome: isPJ ? representante_nome : null,
-        representante_cpf: isPJ ? (representante_cpf || '').replace(/\D/g, '') : null,
+        tipo_parceiro: tipo,
+        representante_nome: tipo === 'imobiliaria' ? representante_nome : null,
+        representante_cpf: tipo === 'imobiliaria' ? (representante_cpf || '').replace(/\D/g, '') : null,
         regiao_id: regiaoPrincipalId,
         status: 'reservado',
         source_landing: source_landing || 'lp',
@@ -139,10 +144,13 @@ async function iniciarCadastro(req, res) {
     for (const r of regioesValidadas) {
       await atualizarContadorRegiao(r.id);
     }
+    const valorReaisCadastro = calcularValorCentavos(regioesValidadas.length) / 100;
     await logEvento(parceiro.id, 'cadastro_iniciado', {
       regioes: regioesValidadas.map(r => r.nome),
       valor_centavos: calcularValorCentavos(regioesValidadas.length),
+      tipo_parceiro: tipo,
     });
+    notifyAdm.cadastroIniciado(parceiro, regioesValidadas, valorReaisCadastro).catch(() => {});
 
     res.status(201).json({
       data: parceiro,
@@ -170,6 +178,7 @@ async function enviarContrato(req, res) {
       const fakeKey = 'mock-' + Date.now();
       await supabase.from('parceiros').update({ clicksign_document_key: fakeKey }).eq('id', parceiroId);
       await logEvento(parceiroId, 'contrato_mock_gerado', { document_key: fakeKey, motivo: 'ClickSign nao configurado' });
+      notifyAdm.contratoEnviado(p, fakeKey).catch(() => {});
       return res.json({
         document_key: fakeKey,
         signed_url: '#mock-clicksign',
@@ -224,6 +233,7 @@ async function enviarContrato(req, res) {
 
     await supabase.from('parceiros').update({ clicksign_document_key: doc.key }).eq('id', parceiroId);
     await logEvento(parceiroId, 'contrato_enviado', { document_key: doc.key });
+    notifyAdm.contratoEnviado(p, doc.key).catch(() => {});
 
     res.json({ document_key: doc.key, signed_url: doc.signed_url || null });
   } catch (e) {
@@ -258,6 +268,7 @@ async function cadastrarCartao(req, res) {
         cartao_cadastrado_em: new Date().toISOString(),
       }).eq('id', parceiroId);
       await logEvento(parceiroId, 'cartao_mock_cadastrado', { subscription_id: fakeSubId, valor_centavos: valorCentavos, num_regioes: numRegioes });
+      notifyAdm.cartaoCadastrado(p, trialEndsAt).catch(() => {});
       return res.json({
         subscription_id: fakeSubId,
         trial_ends_at: trialEndsAt,
@@ -329,6 +340,7 @@ async function cadastrarCartao(req, res) {
     await logEvento(parceiroId, 'subscription_criada', {
       subscription_id: subscription.id, plan_id: plano.id, valor_centavos: valorCentavos, trial_dias: TRIAL_DIAS,
     });
+    notifyAdm.cartaoCadastrado(p, trialEndsAt).catch(() => {});
 
     res.json({
       subscription_id: subscription.id,

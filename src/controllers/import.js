@@ -6,7 +6,25 @@ const MIN_PRICE = Number(process.env.MIN_PRICE || 1500000);
 
 async function importFromUrl(url, importedByPhone, opts) {
   const captadoPor = (opts && opts.captadoPor) === 'socasatop' ? 'socasatop' : 'parceiro';
-  const parceiroAtribuidoId = (opts && opts.parceiroAtribuidoId) ? parseInt(opts.parceiroAtribuidoId) : null;
+  let parceiroAtribuidoId = (opts && opts.parceiroAtribuidoId) ? parseInt(opts.parceiroAtribuidoId) : null;
+
+  // Auto-assign for tipo=corretor parceiros: if importedByPhone matches an active corretor parceiro,
+  // attribute the imoveis to him (cenario B). For imobiliaria, no auto-assign (gestor decides).
+  if (!parceiroAtribuidoId && importedByPhone) {
+    try {
+      const cleanPhone = String(importedByPhone).replace(/\D/g, '');
+      const { data: parc } = await supabase
+        .from('parceiros')
+        .select('id, tipo_parceiro, status')
+        .eq('whatsapp', cleanPhone)
+        .in('status', ['reservado', 'ocupado'])
+        .maybeSingle();
+      if (parc && parc.tipo_parceiro === 'corretor') {
+        parceiroAtribuidoId = parc.id;
+      }
+    } catch (e) { /* ignore */ }
+  }
+
   let result;
   try {
     result = await scraper.scrapeUrl(url);
