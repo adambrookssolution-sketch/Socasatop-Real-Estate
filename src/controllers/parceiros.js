@@ -57,9 +57,14 @@ async function atualizarContadorRegiao(regiaoId) {
 
 async function iniciarCadastro(req, res) {
   try {
-    const { nome, whatsapp, email, cpf_cnpj, creci, especialidade, regiao_id, regiao_slug, regiao_ids, regiao_slugs, source_landing } = req.body;
+    const { nome, whatsapp, email, cpf_cnpj, creci, especialidade, endereco, representante_nome, representante_cpf, regiao_id, regiao_slug, regiao_ids, regiao_slugs, source_landing } = req.body;
     if (!nome || !whatsapp || !email || !cpf_cnpj) {
       return res.status(400).json({ error: 'nome, whatsapp, email e cpf_cnpj obrigatorios' });
+    }
+    const cpfDigits = (cpf_cnpj || '').replace(/\D/g, '');
+    const isPJ = cpfDigits.length === 14;
+    if (isPJ && (!representante_nome || !representante_cpf)) {
+      return res.status(400).json({ error: 'Para PJ (CNPJ), representante_nome e representante_cpf sao obrigatorios' });
     }
 
     let regiaoIdList = [];
@@ -109,6 +114,9 @@ async function iniciarCadastro(req, res) {
         cpf_cnpj: cleanCpf,
         creci: creci || null,
         especialidade: especialidade || null,
+        endereco: endereco || null,
+        representante_nome: isPJ ? representante_nome : null,
+        representante_cpf: isPJ ? (representante_cpf || '').replace(/\D/g, '') : null,
         regiao_id: regiaoPrincipalId,
         status: 'reservado',
         source_landing: source_landing || 'lp',
@@ -180,11 +188,18 @@ async function enviarContrato(req, res) {
     const numRegioes = regioesFinal.length;
     const valorReais = calcularValorCentavos(numRegioes) / 100;
 
+    const cpfDigits = (p.cpf_cnpj || '').replace(/\D/g, '');
+    const tipoPessoa = cpfDigits.length === 14 ? 'PJ' : 'PF';
     const conteudoBase64 = await clicksign.gerarContratoBase64({
       nome: p.nome,
       cpf: p.cpf_cnpj,
       regioes: regioesFinal,
       valor: valorReais,
+      creci: p.creci,
+      endereco: p.endereco,
+      representante_nome: p.representante_nome,
+      representante_cpf: p.representante_cpf,
+      tipo_pessoa: tipoPessoa,
     });
 
     const doc = await clicksign.criarDocumento({

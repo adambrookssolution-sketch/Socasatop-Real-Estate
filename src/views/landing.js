@@ -576,8 +576,14 @@ footer a { color: var(--gold); text-decoration: none; }
       <div class="form-group"><label>Nome completo *</label><input type="text" name="nome" required></div>
       <div class="form-group"><label>WhatsApp (com DDD) *</label><input type="tel" name="whatsapp" placeholder="(61) 99999-9999" required></div>
       <div class="form-group"><label>Email *</label><input type="email" name="email" required></div>
-      <div class="form-group"><label>CPF ou CNPJ *</label><input type="text" name="cpf_cnpj" required></div>
+      <div class="form-group"><label>CPF ou CNPJ *</label><input type="text" name="cpf_cnpj" id="cpf-cnpj-input" required oninput="onCpfCnpjInput()"></div>
+      <div class="form-group"><label>Endereço</label><input type="text" name="endereco" placeholder="Rua, número, bairro, cidade - UF"></div>
       <div class="form-group"><label>CRECI (opcional)</label><input type="text" name="creci"></div>
+      <div id="pj-fields" style="display:none; padding: 12px; background: var(--cream); border-radius: 8px; margin-bottom: 12px;">
+        <p style="font-size: 12px; color: var(--gray); margin-bottom: 10px;">Dados do representante legal (obrigatório para CNPJ):</p>
+        <div class="form-group"><label>Nome do representante *</label><input type="text" name="representante_nome" id="rep-nome"></div>
+        <div class="form-group" style="margin-bottom: 0;"><label>CPF do representante *</label><input type="text" name="representante_cpf" id="rep-cpf"></div>
+      </div>
       <button type="submit" class="btn btn-primary btn-large" style="width:100%; margin-top: 8px;" id="form-submit">Quero garantir minha vaga</button>
       <div class="form-msg" id="form-msg"></div>
     </form>
@@ -727,6 +733,19 @@ function abrirCadastro(regiaoId, nomeRegiao, esgotado) {
 function closeModal() {
   document.getElementById('modal-overlay').classList.remove('open');
   document.getElementById('form-msg').className = 'form-msg';
+}
+
+function onCpfCnpjInput() {
+  var el = document.getElementById('cpf-cnpj-input');
+  var pj = document.getElementById('pj-fields');
+  var nome = document.getElementById('rep-nome');
+  var cpf = document.getElementById('rep-cpf');
+  if (!el || !pj) return;
+  var digits = (el.value || '').replace(/\D/g, '');
+  var isPJ = digits.length > 11;
+  pj.style.display = isPJ ? 'block' : 'none';
+  if (nome) nome.required = isPJ;
+  if (cpf) cpf.required = isPJ;
 }
 
 async function enviarCadastro(e) {
