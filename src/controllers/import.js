@@ -4,7 +4,9 @@ const duplicateDetector = require('../services/duplicate_detector');
 
 const MIN_PRICE = Number(process.env.MIN_PRICE || 1500000);
 
-async function importFromUrl(url, importedByPhone) {
+async function importFromUrl(url, importedByPhone, opts) {
+  const captadoPor = (opts && opts.captadoPor) === 'socasatop' ? 'socasatop' : 'parceiro';
+  const parceiroAtribuidoId = (opts && opts.parceiroAtribuidoId) ? parseInt(opts.parceiroAtribuidoId) : null;
   let result;
   try {
     result = await scraper.scrapeUrl(url);
@@ -97,6 +99,9 @@ async function importFromUrl(url, importedByPhone) {
         status: 'rascunho',
         visibility: 'explicito',
         ativo: true,
+        captado_por: captadoPor,
+        parceiro_atribuido_id: parceiroAtribuidoId,
+        atribuido_em: parceiroAtribuidoId ? new Date().toISOString() : null,
       };
 
       const { data: inserted, error } = await supabase

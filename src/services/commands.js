@@ -255,17 +255,28 @@ async function handleImportar(from, userText) {
     await send(from, 'Apenas ADM ou Gestor pode importar.');
     return true;
   }
-  const m = userText.match(/importar\s+(\S+)/i);
-  if (!m) {
-    await send(from, 'Use: importar [URL]\nEx: importar https://imobiliaria.com.br/imoveis');
+  // Aceita: importar <URL>
+  //         importar socasatop <URL>            -> captado_por = socasatop
+  //         importar socasatop <URL> parceiro N -> + atribui ao parceiro N
+  const captadoMatch = userText.match(/^importar\s+socasatop\s+(\S+)(?:\s+parceiro\s+(\d+))?/i);
+  const simpleMatch = userText.match(/^importar\s+(\S+)/i);
+  let url, captadoPor = 'parceiro', parceiroAtribuidoId = null;
+  if (captadoMatch) {
+    url = captadoMatch[1];
+    captadoPor = 'socasatop';
+    parceiroAtribuidoId = captadoMatch[2] ? parseInt(captadoMatch[2]) : null;
+  } else if (simpleMatch) {
+    url = simpleMatch[1];
+  } else {
+    await send(from, 'Use:\n  importar <URL>\n  importar socasatop <URL>\n  importar socasatop <URL> parceiro <id>');
     return true;
   }
-  const url = m[1];
-  await send(from, 'Iniciando importacao de: ' + url + '\nIsso pode levar alguns minutos. Aviso quando terminar.');
+  const ctxMsg = captadoPor === 'socasatop' ? ' (captado pela So Casa Top' + (parceiroAtribuidoId ? ', atribuido ao parceiro ' + parceiroAtribuidoId : '') + ')' : '';
+  await send(from, 'Iniciando importacao' + ctxMsg + ' de: ' + url + '\nIsso pode levar alguns minutos. Aviso quando terminar.');
 
   setImmediate(async () => {
     try {
-      const result = await importCtrl.importFromUrl(url, permissions.normalizePhone(from));
+      const result = await importCtrl.importFromUrl(url, permissions.normalizePhone(from), { captadoPor, parceiroAtribuidoId });
       let msg = 'Importacao concluida!\n';
       msg += 'Total encontrado: ' + (result.total || 0) + '\n';
       msg += 'Importados: ' + result.imported + '\n';
@@ -460,12 +471,22 @@ async function handleHelp(from) {
   }
   if (role.role === 'adm' || role.role === 'gestor') {
     msg += '- importar [URL]\n';
+    msg += '- importar socasatop [URL] [parceiro N]\n';
     msg += '- pendentes\n';
     msg += '- galeria\n';
     msg += '- oculto [ID] / explicito [ID]\n';
     msg += '- publicar [ID] [canal] / despublicar [ID] [canal]\n';
     msg += '- aprovar [ID] / rejeitar [ID]\n';
     msg += '- cancelar (durante cadastro)\n';
+  }
+  if (role.role === 'adm') {
+    msg += '\nImoveis captados pela So Casa Top:\n';
+    msg += '- captar [ID]               (marca como captado pela SCT)\n';
+    msg += '- atribuir [imovel] [parc]  (atribui imovel a parceiro)\n';
+    msg += '- desatribuir [imovel]\n';
+    msg += '- captados / imoveis socasatop\n';
+    msg += '- imoveis parceiro [ID]\n';
+    msg += '- duplicatas\n';
   }
   if (role.role === 'adm' || role.role === 'gestor' || role.role === 'corretor') {
     msg += '\nCuradoria com IA:\n';
@@ -513,7 +534,118 @@ async function tryHandleCommand(from, userText) {
 
   if (lower === 'duplicatas' || lower === 'duplicados') return await handleDuplicatas(from);
 
+  if (/^captar\s+\d+/i.test(t)) return await handleCaptar(from, t);
+  if (/^atribuir\s+\d+\s+\d+/i.test(t)) return await handleAtribuir(from, t);
+  if (/^desatribuir\s+\d+/i.test(t)) return await handleDesatribuir(from, t);
+  if (lower === 'imoveis socasatop' || lower === 'captados') return await handleListarCaptados(from);
+  if (/^imoveis\s+parceiro\s+\d+/i.test(t)) return await handleImoveisDoParceiro(from, t);
+
   return false;
+}
+
+async function handleCaptar(from, text) {
+  if (!permissions.isADM(from)) { await send(from, 'Apenas ADM.'); return true; }
+  const m = text.match(/^captar\s+(\d+)/i);
+  const imovelId = parseInt(m[1]);
+  const { data: im } = await supabase.from('imoveis').select('id, titulo').eq('id', imovelId).maybeSingle();
+  if (!im) { await send(from, 'Imovel ' + imovelId + ' nao encontrado.'); return true; }
+  const { error } = await supabase.from('imoveis').update({ captado_por: 'socasatop' }).eq('id', imovelId);
+  if (error) { await send(from, 'Erro: ' + error.message); return true; }
+  await send(from, 'Imovel ' + imovelId + ' marcado como CAPTADO PELA SO CASA TOP.\nAplica a clausula 15 do contrato (15% + variavel 15-25%).');
+  return true;
+}
+
+async function handleAtribuir(from, text) {
+  if (!permissions.isADM(from)) { await send(from, 'Apenas ADM.'); return true; }
+  const m = text.match(/^atribuir\s+(\d+)\s+(\d+)/i);
+  const imovelId = parseInt(m[1]);
+  const parceiroId = parseInt(m[2]);
+  const { data: im } = await supabase.from('imoveis').select('id, titulo').eq('id', imovelId).maybeSingle();
+  if (!im) { await send(from, 'Imovel ' + imovelId + ' nao encontrado.'); return true; }
+  const { data: p } = await supabase.from('parceiros').select('id, nome, status').eq('id', parceiroId).maybeSingle();
+  if (!p) { await send(from, 'Parceiro ' + parceiroId + ' nao encontrado.'); return true; }
+  if (!['reservado', 'ocupado'].includes(p.status)) {
+    await send(from, 'Parceiro ' + parceiroId + ' nao esta ativo (status: ' + p.status + ').');
+    return true;
+  }
+  const { error } = await supabase.from('imoveis').update({
+    parceiro_atribuido_id: parceiroId,
+    atribuido_em: new Date().toISOString(),
+  }).eq('id', imovelId);
+  if (error) { await send(from, 'Erro: ' + error.message); return true; }
+  await send(from, 'Imovel ' + imovelId + ' (' + (im.titulo || 's/titulo') + ') atribuido ao parceiro ' + parceiroId + ' (' + p.nome + ').');
+  return true;
+}
+
+async function handleDesatribuir(from, text) {
+  if (!permissions.isADM(from)) { await send(from, 'Apenas ADM.'); return true; }
+  const m = text.match(/^desatribuir\s+(\d+)/i);
+  const imovelId = parseInt(m[1]);
+  const { error } = await supabase.from('imoveis').update({
+    parceiro_atribuido_id: null,
+    atribuido_em: null,
+  }).eq('id', imovelId);
+  if (error) { await send(from, 'Erro: ' + error.message); return true; }
+  await send(from, 'Imovel ' + imovelId + ' desatribuido.');
+  return true;
+}
+
+async function handleListarCaptados(from) {
+  if (!permissions.isADM(from)) { await send(from, 'Apenas ADM.'); return true; }
+  const { data } = await supabase
+    .from('imoveis')
+    .select('id, titulo, neighborhood, amount, parceiro_atribuido_id')
+    .eq('captado_por', 'socasatop')
+    .eq('ativo', true)
+    .order('id', { ascending: false })
+    .limit(30);
+  if (!data || data.length === 0) {
+    await send(from, 'Nenhum imovel captado pela So Casa Top.');
+    return true;
+  }
+  const parceiroIds = [...new Set(data.map(d => d.parceiro_atribuido_id).filter(Boolean))];
+  const parceirosMap = {};
+  if (parceiroIds.length) {
+    const { data: ps } = await supabase.from('parceiros').select('id, nome').in('id', parceiroIds);
+    (ps || []).forEach(p => { parceirosMap[p.id] = p.nome; });
+  }
+  let msg = 'Imoveis CAPTADOS PELA SO CASA TOP (' + data.length + '):\n\n';
+  for (const im of data) {
+    const valor = im.amount ? 'R$ ' + Number(im.amount).toLocaleString('pt-BR') : 's/valor';
+    const atrib = im.parceiro_atribuido_id ? '-> parceiro ' + im.parceiro_atribuido_id + ' (' + (parceirosMap[im.parceiro_atribuido_id] || '?') + ')' : '-> SEM ATRIBUICAO';
+    msg += im.id + '. ' + (im.titulo || 's/titulo') + '\n   ' + (im.neighborhood || '') + ' | ' + valor + '\n   ' + atrib + '\n\n';
+  }
+  msg += 'Comandos:\n  atribuir <imovel_id> <parceiro_id>\n  desatribuir <imovel_id>';
+  await send(from, msg);
+  return true;
+}
+
+async function handleImoveisDoParceiro(from, text) {
+  if (!permissions.isADM(from)) { await send(from, 'Apenas ADM.'); return true; }
+  const m = text.match(/^imoveis\s+parceiro\s+(\d+)/i);
+  const parceiroId = parseInt(m[1]);
+  const { data: p } = await supabase.from('parceiros').select('id, nome').eq('id', parceiroId).maybeSingle();
+  if (!p) { await send(from, 'Parceiro ' + parceiroId + ' nao encontrado.'); return true; }
+  const { data } = await supabase
+    .from('imoveis')
+    .select('id, titulo, neighborhood, amount, captado_por')
+    .or('corretor_id.eq.' + parceiroId + ',parceiro_atribuido_id.eq.' + parceiroId)
+    .eq('ativo', true)
+    .order('id', { ascending: false })
+    .limit(50);
+  if (!data || data.length === 0) {
+    await send(from, p.nome + ' nao tem imoveis vinculados.');
+    return true;
+  }
+  let msg = 'Imoveis de ' + p.nome + ' (id ' + parceiroId + '):\n\n';
+  for (const im of data) {
+    const tag = im.captado_por === 'socasatop' ? '[SCT]' : '[parc]';
+    const valor = im.amount ? 'R$ ' + Number(im.amount).toLocaleString('pt-BR') : 's/valor';
+    msg += tag + ' ' + im.id + '. ' + (im.titulo || 's/titulo') + ' | ' + (im.neighborhood || '') + ' | ' + valor + '\n';
+  }
+  msg += '\n[SCT] = captado pela So Casa Top (clausula 15: 15% + variavel)\n[parc] = captado pelo proprio parceiro';
+  await send(from, msg);
+  return true;
 }
 
 async function handleDuplicatas(from) {
